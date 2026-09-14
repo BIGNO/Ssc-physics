@@ -1,0 +1,21 @@
+[
+  {
+    "id": "p2-2025-01",
+    "chapter": "p2",
+    "year": 2025,
+    "source": "Board",
+    "type": "MCQ",
+    "difficulty": "সহজ",
+    "importance": 5,
+    "concept": "ত্বরণ",
+    "q": "প্রশ্ন...",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": "A",
+    "solution": "ব্যাখ্যা..."
+  }
+]
