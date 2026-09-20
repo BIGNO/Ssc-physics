@@ -1,0 +1,397 @@
+export const chapter1 = {
+  id: "p1",
+  no: 1,
+  title: "ভৌত রাশি ও পরিমাপ",
+  focus: "ভৌত রাশি, একক, SI system, measurement, error, significant figure ও dimensional analysis",
+
+  manual: [
+    "ভৌত রাশি কী তা নিজের ভাষায় বলতে পারা",
+    "মৌলিক ও লব্ধ রাশি আলাদা করতে পারা",
+    "SI মৌলিক এককগুলো লিখতে পারা",
+    "একক conversion করতে পারা",
+    "Least count বুঝতে পারা",
+    "Accuracy ও precision-এর পার্থক্য বলতে পারা",
+    "Absolute ও percentage error বুঝতে পারা",
+    "Significant figure নির্ণয় করতে পারা",
+    "Dimensional formula বের করতে পারা",
+    "Dimensional equation দিয়ে formula যাচাই করতে পারা",
+    "Scientific notation ব্যবহার করতে পারা",
+    "Board-style numerical solve করতে পারা"
+  ],
+
+  concepts: [
+
+    {
+      id: "p1-c1",
+      title: "ভৌত রাশি",
+      definition:
+        "যে রাশিকে পরিমাপ করা যায় এবং সংখ্যা ও এককের মাধ্যমে প্রকাশ করা যায় তাকে ভৌত রাশি বলে।",
+
+      simpleExplanation:
+        "সহজভাবে, যেটা মাপা যায় সেটাই ভৌত রাশি। যেমন দৈর্ঘ্য, ভর, সময়, তাপমাত্রা ইত্যাদি।",
+
+      detailedExplanation:
+        "একটি ভৌত রাশির পূর্ণ প্রকাশে সাধারণত দুটি বিষয় থাকে—সংখ্যামান এবং একক। যেমন 5 m-এ 5 হলো numerical value এবং m হলো unit।",
+
+      formula:
+        "পরিমাপ = সংখ্যামান × একক",
+
+      units: "m, kg, s, A, K, mol, cd ইত্যাদি",
+
+      example:
+        "একটি টেবিলের দৈর্ঘ্য 2 m হলে 2 হলো সংখ্যামান এবং m হলো একক।",
+
+      realLifeExample:
+        "বাজারে 5 kg চাল, 2 L পানি, 10 m কাপড়—সবগুলোই ভৌত রাশির উদাহরণ।",
+
+      examFocus:
+        "সংজ্ঞা, সংখ্যা ও একক, মৌলিক ও লব্ধ রাশির পার্থক্য।",
+
+      commonMistakes:
+        "একক ছাড়া শুধু numerical value-কে সম্পূর্ণ measurement মনে করা।",
+
+      keyPoints: [
+        "পরিমাপযোগ্য হতে হবে",
+        "সংখ্যা ও একক থাকে",
+        "Scalar বা vector হতে পারে"
+      ]
+    },
+
+    {
+      id: "p1-c2",
+      title: "মৌলিক ও লব্ধ রাশি",
+      definition:
+        "যেসব রাশি অন্য কোনো ভৌত রাশির সাহায্য ছাড়াই নির্ধারিত হয় সেগুলো মৌলিক রাশি। মৌলিক রাশির সাহায্যে সংজ্ঞায়িত রাশিকে লব্ধ রাশি বলে।",
+
+      simpleExplanation:
+        "যেগুলো basic building block—সেগুলো fundamental। এগুলো থেকে তৈরি অন্য রাশিগুলো derived।",
+
+      detailedExplanation:
+        "SI পদ্ধতিতে দৈর্ঘ্য, ভর, সময়, তড়িৎ প্রবাহ, তাপমাত্রা, পদার্থের পরিমাণ ও luminous intensity হলো সাতটি মৌলিক রাশি। বেগ, ত্বরণ, বল, ঘনত্ব ইত্যাদি লব্ধ রাশি।",
+
+      formula:
+        "v = s/t\n a = v/t\n F = ma",
+
+      units:
+        "m, kg, s, A, K, mol, cd",
+
+      example:
+        "বেগ = সরণ/সময়। তাই বেগ একটি derived quantity।",
+
+      realLifeExample:
+        "গাড়ির speedometer বেগের মতো derived quantity-এর মান দেয়।",
+
+      examFocus:
+        "৭টি SI fundamental quantity এবং derived quantity-এর উদাহরণ।",
+
+      commonMistakes:
+        "ভর ও ওজনকে একই ধরনের quantity মনে করা।",
+
+      keyPoints: [
+        "SI-তে ৭টি fundamental quantity",
+        "Derived quantity fundamental quantity থেকে তৈরি",
+        "Force, velocity, density হলো derived"
+      ]
+    },
+
+    {
+      id: "p1-c3",
+      title: "SI একক",
+      definition:
+        "আন্তর্জাতিকভাবে স্বীকৃত একক পদ্ধতিকে SI system বলে।",
+
+      simpleExplanation:
+        "বিশ্বব্যাপী physics-এ একই standard unit ব্যবহার করার জন্য SI system ব্যবহৃত হয়।",
+
+      detailedExplanation:
+        "SI হলো International System of Units। Physics-এর numerical problem-এ SI unit ব্যবহার করলে calculation সহজ এবং standard হয়।",
+
+      formula:
+        "1 N = 1 kg·m·s⁻²\n1 J = 1 N·m\n1 W = 1 J/s",
+
+      units:
+        "Length → m\nMass → kg\nTime → s\nCurrent → A\nTemperature → K",
+
+      example:
+        "500 cm = 5 m",
+
+      realLifeExample:
+        "Engineering, laboratory এবং scientific measurement-এ SI unit standard হিসেবে ব্যবহৃত হয়।",
+
+      examFocus:
+        "SI unit, conversion এবং derived unit।",
+
+      commonMistakes:
+        "cm, g, minute ইত্যাদি সরাসরি SI equation-এ বসিয়ে দেওয়া।",
+
+      keyPoints: [
+        "Calculation-এর আগে unit conversion করো",
+        "SI length = metre",
+        "SI mass = kilogram",
+        "SI time = second"
+      ]
+    },
+
+    {
+      id: "p1-c4",
+      title: "পরিমাপ ও Least Count",
+      definition:
+        "কোনো physical quantity-এর মান যন্ত্রের সাহায্যে নির্ণয় করাকে measurement বলে। যন্ত্রে মাপা সম্ভব সবচেয়ে ছোট মানকে least count বলে।",
+
+      simpleExplanation:
+        "একটি measuring instrument কত ছোট difference মাপতে পারে সেটাই তার least count-এর সাথে সম্পর্কিত।",
+
+      detailedExplanation:
+        "একটি যন্ত্রের precision বোঝার জন্য least count গুরুত্বপূর্ণ। Least count যত ছোট, সাধারণভাবে যন্ত্রটি তত সূক্ষ্ম measurement করতে পারে।",
+
+      formula:
+        "Least Count = Smallest measurable division",
+
+      units:
+        "যন্ত্রভেদে mm, cm, g, s ইত্যাদি",
+
+      example:
+        "একটি ruler-এর smallest division যদি 1 mm হয়, তবে least count = 1 mm।",
+
+      realLifeExample:
+        "Ruler, stopwatch, thermometer, vernier caliper ইত্যাদি measurement instrument।",
+
+      examFocus:
+        "Least count definition এবং instrument reading।",
+
+      commonMistakes:
+        "Least count-কে total range মনে করা।",
+
+      keyPoints: [
+        "Smallest measurable division",
+        "Instrument-এর precision-এর সঙ্গে সম্পর্কিত",
+        "Reading-এর সীমাবদ্ধতা বুঝতে সাহায্য করে"
+      ]
+    },
+
+    {
+      id: "p1-c5",
+      title: "Accuracy ও Precision",
+      definition:
+        "Measured value প্রকৃত মানের কতটা কাছাকাছি তাকে accuracy বলে। Repeated measurements পরস্পরের কতটা কাছাকাছি তাকে precision বলে।",
+
+      simpleExplanation:
+        "Accuracy = আসল মানের কাছাকাছি। Precision = বারবার মাপলে একই রকম ফল।",
+
+      detailedExplanation:
+        "কোনো instrument precise হতে পারে কিন্তু accurate নাও হতে পারে যদি systematic error থাকে। আবার কিছু measurement average-এ accurate হলেও individual readings খুব precise নাও হতে পারে।",
+
+      formula:
+        "Accuracy → closeness to true value\nPrecision → closeness among repeated values",
+
+      units:
+        "Unit-dependent",
+
+      example:
+        "True value 10 cm। Readings 10.1, 10.1, 10.1 হলে precision বেশি।",
+
+      realLifeExample:
+        "Digital weighing scale repeated একই value দেখালে precision ভালো।",
+
+      examFocus:
+        "Accuracy বনাম precision—comparison question।",
+
+      commonMistakes:
+        "Accuracy এবং precision-কে একই বিষয় বলা।",
+
+      keyPoints: [
+        "Accuracy → true value",
+        "Precision → repeated values",
+        "একটি অন্যটির সমার্থক নয়"
+      ]
+    },
+
+    {
+      id: "p1-c6",
+      title: "Measurement Error",
+      definition:
+        "Measured value এবং accepted/true value-এর পার্থক্যকে measurement error বলা হয়।",
+
+      simpleExplanation:
+        "মাপার সময় যে deviation হয় সেটাই error।",
+
+      detailedExplanation:
+        "Error instrument, observer, environment বা measurement procedure-এর কারণে হতে পারে। Error analysis experimental physics-এর গুরুত্বপূর্ণ অংশ।",
+
+      formula:
+        "Absolute Error = |Measured − True|",
+
+      units:
+        "Measured quantity-এর একই unit",
+
+      example:
+        "True length = 10 cm, measured = 9.8 cm\nAbsolute error = 0.2 cm",
+
+      realLifeExample:
+        "Thermometer reading বা ruler reading-এ small uncertainty থাকতে পারে।",
+
+      examFocus:
+        "Absolute error এবং percentage error।",
+
+      commonMistakes:
+        "Error-কে সবসময় negative quantity মনে করা।",
+
+      keyPoints: [
+        "Absolute error magnitude হিসেবে লেখা হয়",
+        "Percentage error relative comparison দেয়",
+        "Measurement-এ uncertainty থাকে"
+      ]
+    },
+
+    {
+      id: "p1-c7",
+      title: "Significant Figures",
+      definition:
+        "একটি measured quantity-এর meaningful digits-গুলোকে significant figures বলে।",
+
+      simpleExplanation:
+        "Measurement-এর যেসব digit সত্যিই meaningful, সেগুলো significant figure।",
+
+      detailedExplanation:
+        "Significant figures measurement-এর precision বোঝাতে সাহায্য করে। Leading zero সাধারণত significant নয়; decimal-এর পর trailing zero meaningful হতে পারে।",
+
+      formula:
+        "Percentage uncertainty ≈ (absolute uncertainty / measured value) × 100%",
+
+      units:
+        "Unit-dependent",
+
+      example:
+        "0.00450-এ 3টি significant figure আছে: 4, 5, 0।",
+
+      realLifeExample:
+        "Laboratory measurement result কতটা precise তা significant figures দিয়ে বোঝানো হয়।",
+
+      examFocus:
+        "Significant digit count এবং rounding।",
+
+      commonMistakes:
+        "Leading zero-কে significant figure ধরে নেওয়া।",
+
+      keyPoints: [
+        "Leading zero সাধারণত significant নয়",
+        "Meaningful zeros গুরুত্বপূর্ণ হতে পারে",
+        "Measured value-এর precision বোঝায়"
+      ]
+    },
+
+    {
+      id: "p1-c8",
+      title: "মাত্রা ও Dimensional Formula",
+      definition:
+        "কোনো physical quantity-কে মৌলিক quantities-এর powers দিয়ে প্রকাশ করলে সেটি তার dimensional formula।",
+
+      simpleExplanation:
+        "একটি quantity কোন basic quantity থেকে তৈরি সেটা M, L, T দিয়ে দেখানো যায়।",
+
+      detailedExplanation:
+        "Mechanical quantities-এর ক্ষেত্রে সাধারণত M (mass), L (length) এবং T (time) ব্যবহার করা হয়।",
+
+      formula:
+        "[v] = LT⁻¹\n[a] = LT⁻²\n[F] = MLT⁻²\n[W] = ML²T⁻²",
+
+      units:
+        "Dimensional formula নিজে conventional physical unit নয়।",
+
+      example:
+        "F = ma\n[F] = M × LT⁻² = MLT⁻²",
+
+      realLifeExample:
+        "Formula correct কিনা quickly verify করতে dimensional analysis ব্যবহার করা হয়।",
+
+      examFocus:
+        "Velocity, acceleration, force, work, power-এর dimension।",
+
+      commonMistakes:
+        "Dimension এবং unit-কে একই জিনিস মনে করা।",
+
+      keyPoints: [
+        "Dimension ≠ Unit",
+        "Formula checking-এ ব্যবহার হয়",
+        "Unit conversion-এও সাহায্য করে"
+      ]
+    },
+
+    {
+      id: "p1-c9",
+      title: "Dimensional Analysis",
+      definition:
+        "মৌলিক রাশির dimension ব্যবহার করে কোনো equation-এর dimensional consistency যাচাই করার পদ্ধতিকে dimensional analysis বলে।",
+
+      simpleExplanation:
+        "Formula-এর দুই পাশে dimension একই কিনা check করা যায়।",
+
+      detailedExplanation:
+        "কোনো physically correct equation-এর প্রতিটি additive term-এর dimension একই হতে হবে এবং দুই পাশের dimensionally compatible হতে হবে।",
+
+      formula:
+        "LHS dimension = RHS dimension",
+
+      units:
+        "M, L, T এবং অন্যান্য base dimensions",
+
+      example:
+        "s = ut + ½at²\n[ut] = L\n[at²] = LT⁻² × T² = L",
+
+      realLifeExample:
+        "Complex numerical equation ব্যবহারের আগে formula check করতে dimensional analysis ব্যবহার করা যায়।",
+
+      examFocus:
+        "Formula verification এবং missing power নির্ণয়।",
+
+      commonMistakes:
+        "Numerical constant-এর dimension আছে ধরে নেওয়া।",
+
+      keyPoints: [
+        "Equation-এর দুই পাশে compatible dimension",
+        "Addition-এর terms-এর same dimension",
+        "Dimension দিয়ে সব physics relationship যাচাই করা যায় না"
+      ]
+    },
+
+    {
+      id: "p1-c10",
+      title: "Scientific Notation",
+      definition:
+        "খুব বড় বা ছোট সংখ্যাকে a × 10ⁿ আকারে প্রকাশ করাকে scientific notation বলে।",
+
+      simpleExplanation:
+        "বড়/ছোট number short form-এ লেখা।",
+
+      detailedExplanation:
+        "Scientific notation calculation সহজ করে এবং significant figures স্পষ্টভাবে প্রকাশ করতে সাহায্য করে।",
+
+      formula:
+        "a × 10ⁿ, যেখানে 1 ≤ a < 10",
+
+      units:
+        "মূল physical quantity-এর unit অপরিবর্তিত থাকে।",
+
+      example:
+        "300000 = 3 × 10⁵\n0.00045 = 4.5 × 10⁻⁴",
+
+      realLifeExample:
+        "Speed of light, atomic size, astronomical distance ইত্যাদিতে ব্যবহার হয়।",
+
+      examFocus:
+        "Scientific notation conversion।",
+
+      commonMistakes:
+        "Decimal move-এর direction অনুযায়ী exponent sign ভুল করা।",
+
+      keyPoints: [
+        "Coefficient 1 থেকে 10-এর মধ্যে",
+        "বড় number → positive exponent",
+        "ছোট number → negative exponent"
+      ]
+    }
+
+  ],
+
+  diagram: "measure"
+};

@@ -1,0 +1,374 @@
+export const chapter2 = {
+  id: "p2",
+  no: 2,
+  title: "গতি",
+  focus: "Motion, distance, displacement, speed, velocity, acceleration and motion graphs",
+
+  manual: [
+    "স্থিতি ও গতি (Rest and Motion) বুঝতে হবে",
+    "দূরত্ব ও সরণের পার্থক্য বুঝতে হবে",
+    "দ্রুতি ও বেগের ধারণা শিখতে হবে",
+    "গড় দ্রুতি ও গড় বেগ নির্ণয় করতে হবে",
+    "ত্বরণ ও মন্দন বুঝতে হবে",
+    "সমবেগ ও অসমবেগের গতি বুঝতে হবে",
+    "গতি সম্পর্কিত সূত্র প্রয়োগ করতে হবে",
+    "s-t এবং v-t graph পড়তে ও ব্যাখ্যা করতে হবে",
+    "গ্রাফ থেকে প্রয়োজনীয় রাশি নির্ণয় করতে হবে",
+    "বাস্তব জীবনের motion problem সমাধান করতে হবে"
+  ],
+
+  concepts: [
+    {
+      id: "motion",
+      title: "স্থিতি ও গতি",
+      definition: "সময়ের পরিবর্তনের সাথে কোনো বস্তুর অবস্থানের পরিবর্তন হলে তাকে গতি বলে। কোনো নির্দিষ্ট প্রসঙ্গের সাপেক্ষে অবস্থানের পরিবর্তন না হলে বস্তুটি স্থির অবস্থায় আছে।",
+      simpleExplanation: "একটি বস্তুর অবস্থান সময়ের সাথে বদলালে সেটি গতিশীল। অবস্থান না বদলালে সেটি স্থির।",
+      detailedExplanation: "গতি ও স্থিতি আপেক্ষিক। যেমন, চলন্ত বাসের যাত্রী বাসের তুলনায় স্থির কিন্তু রাস্তার গাছের তুলনায় গতিশীল। তাই motion নির্ণয়ের জন্য reference point বা প্রসঙ্গবিন্দু প্রয়োজন।",
+      formula: "অবস্থান পরিবর্তন = নতুন অবস্থান − পুরোনো অবস্থান",
+      units: "SI unit: metre (m)",
+      example: "একটি গাড়ি রাস্তার একটি নির্দিষ্ট স্থান থেকে অন্য স্থানে গেলে গাড়িটির অবস্থান পরিবর্তিত হয়, তাই গাড়িটি গতিশীল।",
+      realLifeExample: "চলন্ত বাস, উড়ন্ত বিমান, চলন্ত লিফট।",
+      examFocus: "স্থিতি ও গতি আপেক্ষিক কেন—ব্যাখ্যা করতে পারা।",
+      commonMistakes: "সবসময় কোনো বস্তুকে শুধু স্থির বা শুধু গতিশীল মনে করা। Reference point বিবেচনা না করা।",
+      keyPoints: [
+        "গতি নির্ণয়ের জন্য reference point প্রয়োজন।",
+        "স্থিতি ও গতি আপেক্ষিক।",
+        "সময় ও অবস্থানের পরিবর্তন motion-এর মূল বিষয়।"
+      ]
+    },
+
+    {
+      id: "distance",
+      title: "দূরত্ব (Distance)",
+      definition: "কোনো বস্তু যে মোট পথ অতিক্রম করে তার দৈর্ঘ্যকে দূরত্ব বলে।",
+      simpleExplanation: "বস্তুটি মোট যতটা পথ গেছে সেটাই distance।",
+      detailedExplanation: "Distance একটি scalar quantity। এর শুধু মান আছে, দিক নেই। বস্তুটি বাঁকা বা সোজা যে পথেই চলুক, সম্পূর্ণ অতিক্রান্ত পথের দৈর্ঘ্য distance হিসেবে গণনা করা হয়।",
+      formula: "Distance = মোট অতিক্রান্ত পথ",
+      units: "SI unit: metre (m)",
+      example: "একজন ছাত্র 3 m সামনে গিয়ে 2 m পিছনে এলে মোট distance = 3 + 2 = 5 m।",
+      realLifeExample: "Google Maps-এ কোনো route-এর মোট পথের দৈর্ঘ্য distance-এর উদাহরণ।",
+      examFocus: "Distance-এর সংজ্ঞা, একক এবং scalar nature।",
+      commonMistakes: "Distance-কে displacement-এর সাথে গুলিয়ে ফেলা।",
+      keyPoints: [
+        "Distance scalar quantity।",
+        "Distance কখনো negative হয় না।",
+        "Distance হলো মোট অতিক্রান্ত পথ।"
+      ]
+    },
+
+    {
+      id: "displacement",
+      title: "সরণ (Displacement)",
+      definition: "কোনো বস্তুর প্রাথমিক অবস্থান থেকে চূড়ান্ত অবস্থানের দিকসহ সরলরেখার দূরত্বকে সরণ বলে।",
+      simpleExplanation: "শুরু থেকে শেষ পর্যন্ত সবচেয়ে ছোট সরলরেখার দিকসহ পরিবর্তন হলো displacement।",
+      detailedExplanation: "Displacement একটি vector quantity। এর মান ও দিক দুটোই আছে। বস্তু আবার শুরুর অবস্থানে ফিরে এলে displacement শূন্য হতে পারে, যদিও distance শূন্য নয়।",
+      formula: "Displacement = Final position − Initial position",
+      units: "SI unit: metre (m)",
+      example: "একজন 5 m পূর্বদিকে গিয়ে 2 m পশ্চিমে এলে displacement = 3 m পূর্বদিকে।",
+      realLifeExample: "বাড়ি থেকে স্কুলে যাওয়ার ক্ষেত্রে সরলরেখায় বাড়ি ও স্কুলের অবস্থানের পার্থক্য displacement-এর ধারণা দেয়।",
+      examFocus: "Distance ও displacement-এর পার্থক্য।",
+      commonMistakes: "Displacement-কে সবসময় মোট পথ মনে করা।",
+      keyPoints: [
+        "Displacement vector quantity।",
+        "Displacement positive, negative বা zero হতে পারে।",
+        "Distance ≥ magnitude of displacement।"
+      ]
+    },
+
+    {
+      id: "speed",
+      title: "দ্রুতি (Speed)",
+      definition: "একক সময়ে কোনো বস্তু যে দূরত্ব অতিক্রম করে তাকে দ্রুতি বলে।",
+      simpleExplanation: "কত দ্রুত কোনো বস্তু পথ অতিক্রম করছে তা speed দিয়ে বোঝানো হয়।",
+      detailedExplanation: "Speed একটি scalar quantity। নির্দিষ্ট সময়ে অতিক্রান্ত distance দিয়ে speed নির্ণয় করা হয়।",
+      formula: "Speed = Distance / Time",
+      units: "m/s; km/h",
+      example: "একটি গাড়ি 100 m পথ 20 s-এ অতিক্রম করলে speed = 100/20 = 5 m/s।",
+      realLifeExample: "গাড়ির speedometer গাড়ির তাৎক্ষণিক speed দেখায়।",
+      examFocus: "v = s/t সূত্র এবং unit conversion।",
+      commonMistakes: "km/h ও m/s conversion ভুল করা।",
+      keyPoints: [
+        "Speed scalar quantity।",
+        "Speed = distance/time।",
+        "1 m/s = 3.6 km/h।"
+      ]
+    },
+
+    {
+      id: "velocity",
+      title: "বেগ (Velocity)",
+      definition: "একক সময়ে কোনো বস্তুর সরণের হারকে বেগ বলে।",
+      simpleExplanation: "কত দ্রুত এবং কোন দিকে বস্তুটি অবস্থান পরিবর্তন করছে সেটি velocity।",
+      detailedExplanation: "Velocity একটি vector quantity। একই speed হলেও direction পরিবর্তিত হলে velocity পরিবর্তিত হতে পারে।",
+      formula: "Velocity = Displacement / Time",
+      units: "SI unit: m/s",
+      example: "10 m পূর্বদিকে displacement 2 s-এ হলে velocity = 5 m/s পূর্বদিকে।",
+      realLifeExample: "বাতাসের velocity বলতে শুধু বাতাসের গতি নয়, বাতাস কোন দিকে প্রবাহিত হচ্ছে সেটিও বোঝায়।",
+      examFocus: "Speed বনাম velocity।",
+      commonMistakes: "Velocity-তে direction না লেখা।",
+      keyPoints: [
+        "Velocity vector quantity।",
+        "Velocity-এর magnitude speed-এর সমান হতে পারে।",
+        "Direction পরিবর্তন হলে velocity পরিবর্তিত হয়।"
+      ]
+    },
+
+    {
+      id: "average-speed",
+      title: "গড় দ্রুতি (Average Speed)",
+      definition: "মোট অতিক্রান্ত দূরত্বকে মোট সময় দিয়ে ভাগ করলে গড় দ্রুতি পাওয়া যায়।",
+      simpleExplanation: "পুরো যাত্রায় গড়ে প্রতি সেকেন্ডে কত দূরত্ব অতিক্রম করেছে সেটিই average speed।",
+      detailedExplanation: "যাত্রার বিভিন্ন অংশে speed আলাদা হলেও মোট distance এবং মোট time ব্যবহার করে average speed নির্ণয় করা যায়।",
+      formula: "Average Speed = Total Distance / Total Time",
+      units: "m/s",
+      example: "60 m পথ 10 s এবং 40 m পথ 10 s-এ গেলে average speed = 100/20 = 5 m/s।",
+      realLifeExample: "একটি গাড়ির পুরো যাত্রার average speed বের করতে মোট distance ও total travel time ব্যবহার করা হয়।",
+      examFocus: "Average speed-এর numerical problem।",
+      commonMistakes: "দুইটি speed-এর সাধারণ average নিয়ে নেওয়া।",
+      keyPoints: [
+        "Average speed = total distance / total time।",
+        "শুধু speed-গুলোর arithmetic average সবসময় সঠিক নয়।"
+      ]
+    },
+
+    {
+      id: "average-velocity",
+      title: "গড় বেগ (Average Velocity)",
+      definition: "মোট সরণকে মোট সময় দিয়ে ভাগ করলে গড় বেগ পাওয়া যায়।",
+      simpleExplanation: "পুরো সময়ের মধ্যে মোট displacement কত হয়েছে তার হার হলো average velocity।",
+      detailedExplanation: "Average velocity vector quantity। মোট displacement শূন্য হলে average velocity-ও শূন্য হবে।",
+      formula: "Average Velocity = Total Displacement / Total Time",
+      units: "m/s",
+      example: "একজন ব্যক্তি 100 m পূর্বে গিয়ে 100 m পশ্চিমে ফিরে এলে total displacement = 0, তাই average velocity = 0।",
+      realLifeExample: "একটি দৌড়বিদ একই starting point-এ ফিরে এলে পুরো দৌড়ের average velocity শূন্য।",
+      examFocus: "Average speed এবং average velocity-এর পার্থক্য।",
+      commonMistakes: "Total distance ব্যবহার করে average velocity বের করা।",
+      keyPoints: [
+        "Average velocity displacement-এর উপর নির্ভর করে।",
+        "Starting point-এ ফিরে এলে average velocity zero হতে পারে।"
+      ]
+    },
+
+    {
+      id: "acceleration",
+      title: "ত্বরণ (Acceleration)",
+      definition: "একক সময়ে বেগের পরিবর্তনের হারকে ত্বরণ বলে।",
+      simpleExplanation: "সময় বাড়ার সাথে velocity কত দ্রুত পরিবর্তিত হচ্ছে তা acceleration।",
+      detailedExplanation: "Velocity-এর মান বা direction পরিবর্তিত হলেই acceleration থাকতে পারে। তাই uniform circular motion-এ speed constant হলেও velocity direction পরিবর্তনের কারণে acceleration থাকে।",
+      formula: "a = (v − u) / t",
+      units: "m/s²",
+      example: "একটি গাড়ির initial velocity 5 m/s এবং final velocity 15 m/s, সময় 2 s হলে a = (15−5)/2 = 5 m/s²।",
+      realLifeExample: "গাড়ি দ্রুতগতিতে accelerate করলে তার velocity দ্রুত বাড়ে।",
+      examFocus: "a = (v-u)/t এবং motion equations।",
+      commonMistakes: "Acceleration-এর unit m/s লেখা।",
+      keyPoints: [
+        "Acceleration vector quantity।",
+        "SI unit m/s²।",
+        "Velocity পরিবর্তন হলেই acceleration থাকতে পারে।"
+      ]
+    },
+
+    {
+      id: "retardation",
+      title: "মন্দন (Retardation)",
+      definition: "সময়ের সাথে কোনো বস্তুর বেগ কমার হারকে মন্দন বলে।",
+      simpleExplanation: "বস্তু যখন ধীরে ধীরে কম speed-এ চলে, তখন retardation হয়।",
+      detailedExplanation: "Retardation হলো acceleration-এর এমন অবস্থা যেখানে velocity-এর magnitude কমে। অনেক ক্ষেত্রে acceleration-এর মান negative ধরা হয়।",
+      formula: "Retardation = (u − v) / t",
+      units: "m/s²",
+      example: "একটি গাড়ির speed 20 m/s থেকে 10 m/s-এ 5 s-এ নামলে retardation = (20−10)/5 = 2 m/s²।",
+      realLifeExample: "গাড়িতে brake করলে গাড়ির velocity কমে এবং retardation হয়।",
+      examFocus: "Acceleration ও retardation-এর numerical।",
+      commonMistakes: "Retardation-এর unit ভুল লেখা।",
+      keyPoints: [
+        "Retardation-এ speed কমে।",
+        "Acceleration-এর opposite direction হতে পারে।"
+      ]
+    },
+
+    {
+      id: "equations-motion",
+      title: "গতির সমীকরণ",
+      definition: "সমত্বরণে চলমান বস্তুর initial velocity, final velocity, acceleration, time এবং displacement-এর সম্পর্ককে motion equations বলে।",
+      simpleExplanation: "সমত্বরণে চলার সময় unknown quantity বের করার জন্য এই সূত্রগুলো ব্যবহার করা হয়।",
+      detailedExplanation: "প্রধান তিনটি সমীকরণ হলো v = u + at, s = ut + 1/2 at² এবং v² = u² + 2as। প্রশ্নে কোন কোন quantity দেওয়া আছে তার উপর ভিত্তি করে উপযুক্ত equation নির্বাচন করতে হয়।",
+      formula: "v = u + at\ns = ut + 1/2 at²\nv² = u² + 2as",
+      units: "u,v: m/s; a: m/s²; t: s; s: m",
+      example: "u=0, a=2 m/s², t=5 s হলে v=10 m/s।",
+      realLifeExample: "স্থির অবস্থা থেকে গাড়ি সমত্বরণে চলা।",
+      examFocus: "Equation selection এবং numerical problem।",
+      commonMistakes: "u, v, a, s, t-এর মান ভুল বসানো।",
+      keyPoints: [
+        "এই equations সমত্বরণের ক্ষেত্রে প্রযোজ্য।",
+        "Sign convention ঠিক রাখতে হবে।",
+        "প্রশ্নের data দেখে formula নির্বাচন করতে হবে।"
+      ]
+    },
+
+    {
+      id: "uniform-motion",
+      title: "সমবেগ ও অসমবেগ",
+      definition: "সমান সময়ে সমান দূরত্ব অতিক্রম করলে সমদ্রুতি বা uniform speed-এর motion হয়। সময়ের সাথে speed পরিবর্তিত হলে motion অসমবেগের।",
+      simpleExplanation: "একই হারে চললে uniform motion; speed বদলালে non-uniform motion।",
+      detailedExplanation: "Uniform motion-এ equal time interval-এ equal distance অতিক্রান্ত হয়। Non-uniform motion-এ equal time interval-এ distance সমান নাও হতে পারে।",
+      formula: "Uniform speed: v = constant",
+      units: "m/s",
+      example: "প্রতি সেকেন্ডে 5 m করে অতিক্রম করলে motion uniform।",
+      realLifeExample: "Ideal conveyor belt uniform motion-এর কাছাকাছি উদাহরণ।",
+      examFocus: "Uniform বনাম non-uniform motion।",
+      commonMistakes: "Uniform motion মানেই velocity সবসময় constant—direction বিবেচনা না করা।",
+      keyPoints: [
+        "Uniform motion-এ equal time-এ equal distance।",
+        "Direction পরিবর্তন হলে velocity constant থাকে না।"
+      ]
+    },
+
+    {
+      id: "motion-graph",
+      title: "গতি লেখচিত্র (Motion Graph)",
+      definition: "সময় ও motion-related quantity-এর মধ্যে সম্পর্ক graph-এর মাধ্যমে প্রকাশ করলে তাকে motion graph বলা হয়।",
+      simpleExplanation: "সময় অনুযায়ী distance, displacement বা velocity কীভাবে বদলায় তা graph দিয়ে দেখা যায়।",
+      detailedExplanation: "Distance-time graph-এর slope speed নির্দেশ করতে পারে। Velocity-time graph-এর slope acceleration নির্দেশ করে এবং graph-এর নিচের area displacement নির্দেশ করে।",
+      formula: "Slope of s-t graph = speed\nSlope of v-t graph = acceleration\nArea under v-t graph = displacement",
+      units: "Slope/area অনুযায়ী unit পরিবর্তিত হয়।",
+      example: "v-t graph-এর slope যদি 2 m/s² হয়, acceleration 2 m/s²।",
+      realLifeExample: "Vehicle data logger দিয়ে গাড়ির velocity-time graph তৈরি করা যায়।",
+      examFocus: "Graph-এর slope ও area নির্ণয়।",
+      commonMistakes: "v-t graph-এর area-কে acceleration মনে করা।",
+      keyPoints: [
+        "s-t graph-এর slope speed।",
+        "v-t graph-এর slope acceleration।",
+        "v-t graph-এর area displacement।"
+      ]
+    }
+  ],
+
+  questions: [
+    {
+      id: "ch2-q01",
+      conceptId: "motion",
+      type: "MCQ",
+      question: "গতি নির্ণয়ের জন্য কোনটি প্রয়োজন?",
+      options: ["Reference point", "শুধু ভর", "শুধু বল", "শুধু তাপমাত্রা"],
+      answer: "Reference point",
+      explanation: "কোনো বস্তুর অবস্থান পরিবর্তন বোঝার জন্য reference point প্রয়োজন।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q02",
+      conceptId: "distance",
+      type: "MCQ",
+      question: "Distance কোন ধরনের রাশি?",
+      options: ["Scalar", "Vector", "Tensor", "Dimensionless"],
+      answer: "Scalar",
+      explanation: "Distance-এর শুধু মান আছে, দিক নেই।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q03",
+      conceptId: "displacement",
+      type: "MCQ",
+      question: "Displacement কোন ধরনের রাশি?",
+      options: ["Scalar", "Vector", "Dimensionless", "Constant"],
+      answer: "Vector",
+      explanation: "Displacement-এর মান ও দিক দুটোই থাকে।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q04",
+      conceptId: "speed",
+      type: "Numerical",
+      question: "একটি গাড়ি 200 m পথ 20 s-এ অতিক্রম করে। গাড়িটির speed কত?",
+      answer: "10 m/s",
+      explanation: "Speed = distance/time = 200/20 = 10 m/s।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q05",
+      conceptId: "velocity",
+      type: "MCQ",
+      question: "Velocity-এর ক্ষেত্রে কোন বিষয়টি অবশ্যই বিবেচনা করতে হয়?",
+      options: ["Direction", "শুধু mass", "শুধু temperature", "শুধু volume"],
+      answer: "Direction",
+      explanation: "Velocity একটি vector quantity, তাই direction প্রয়োজন।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q06",
+      conceptId: "acceleration",
+      type: "Numerical",
+      question: "একটি বস্তুর velocity 10 m/s থেকে 30 m/s হয় 5 s-এ। Acceleration নির্ণয় করো।",
+      answer: "4 m/s²",
+      explanation: "a = (v-u)/t = (30-10)/5 = 4 m/s²।",
+      difficulty: "Medium",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q07",
+      conceptId: "retardation",
+      type: "Numerical",
+      question: "একটি গাড়ির velocity 20 m/s থেকে 5 m/s-এ 3 s-এ কমে। Retardation কত?",
+      answer: "5 m/s²",
+      explanation: "Retardation = (20-5)/3 = 5 m/s²।",
+      difficulty: "Medium",
+      importance: 4,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q08",
+      conceptId: "equations-motion",
+      type: "Numerical",
+      question: "একটি বস্তু স্থির অবস্থা থেকে 2 m/s² সমত্বরণে 5 s চলে। Final velocity কত?",
+      answer: "10 m/s",
+      explanation: "v = u+at = 0+(2×5)=10 m/s।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q09",
+      conceptId: "average-speed",
+      type: "Numerical",
+      question: "একটি বস্তু মোট 150 m পথ 30 s-এ অতিক্রম করে। Average speed কত?",
+      answer: "5 m/s",
+      explanation: "Average speed = total distance/total time = 150/30 = 5 m/s।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+
+    {
+      id: "ch2-q10",
+      conceptId: "motion-graph",
+      type: "MCQ",
+      question: "Velocity-time graph-এর slope কী নির্দেশ করে?",
+      options: ["Acceleration", "Distance", "Mass", "Force"],
+      answer: "Acceleration",
+      explanation: "v-t graph-এর slope = change in velocity/time = acceleration।",
+      difficulty: "Medium",
+      importance: 5,
+      source: "Concept Practice"
+    }
+  ],
+
+  sourcesNote: "এই chapter-এর প্রশ্নগুলো বর্তমানে Concept Practice হিসেবে দেওয়া হয়েছে। Verified Board/School প্রশ্ন পরে আলাদা source ও year tag সহ যুক্ত করা হবে।"
+};

@@ -1,0 +1,387 @@
+export const chapter3 = {
+  id: "p3",
+  no: 3,
+  title: "বল",
+  focus: "Force, inertia, Newton's laws, momentum, friction and applications of force",
+
+  manual: [
+    "বল কী এবং বলের প্রভাব বুঝতে হবে",
+    "জড়তা ও জড়তার প্রকারভেদ বুঝতে হবে",
+    "নিউটনের প্রথম সূত্র ব্যাখ্যা করতে হবে",
+    "নিউটনের দ্বিতীয় সূত্র থেকে F = ma বুঝতে হবে",
+    "নিউটনের তৃতীয় সূত্র ও action-reaction pair বুঝতে হবে",
+    "ভরবেগ ও ভরবেগের পরিবর্তন বুঝতে হবে",
+    "ভরবেগ সংরক্ষণ সূত্র প্রয়োগ করতে হবে",
+    "ঘর্ষণ বলের ধারণা ও প্রকারভেদ জানতে হবে",
+    "ঘর্ষণের সুবিধা ও অসুবিধা বুঝতে হবে",
+    "বাস্তব জীবনে Newton's laws প্রয়োগ করতে হবে"
+  ],
+
+  concepts: [
+    {
+      id: "force",
+      title: "বল (Force)",
+      definition: "যে ভৌত রাশি কোনো বস্তুর স্থিতি বা গতির অবস্থা পরিবর্তন করতে পারে অথবা পরিবর্তনের চেষ্টা করে তাকে বল বলে।",
+      simpleExplanation: "ধাক্কা বা টানকে সাধারণভাবে বল বলা যায়।",
+      detailedExplanation: "বল একটি vector quantity। বল প্রয়োগ করলে বস্তুর বেগের মান বা দিক পরিবর্তিত হতে পারে। বলের প্রভাবে বস্তুর আকারও পরিবর্তিত হতে পারে।",
+      formula: "F = ma",
+      units: "SI unit: Newton (N)",
+      example: "একটি স্থির বলকে ধাক্কা দিলে সেটি চলতে শুরু করে।",
+      realLifeExample: "দরজা খোলা, বলকে লাথি দেওয়া এবং গাড়িতে brake করা—সব ক্ষেত্রেই force কাজ করে।",
+      examFocus: "বল-এর সংজ্ঞা, একক, দিক এবং প্রভাব।",
+      commonMistakes: "Force-কে scalar quantity মনে করা।",
+      keyPoints: [
+        "Force একটি vector quantity।",
+        "SI unit Newton (N)।",
+        "Force বস্তুর motion বা shape পরিবর্তন করতে পারে।"
+      ]
+    },
+
+    {
+      id: "effects-force",
+      title: "বলের প্রভাব",
+      definition: "বল কোনো বস্তুর স্থিতি, গতি, গতির দিক বা আকার পরিবর্তন করতে পারে।",
+      simpleExplanation: "বল দিলে বস্তু চলতে পারে, থামতে পারে, দিক পরিবর্তন করতে পারে বা বাঁকতে পারে।",
+      detailedExplanation: "একটি force বস্তুকে accelerate বা decelerate করতে পারে। এছাড়া force বস্তুর shape পরিবর্তন করতে পারে। একই বস্তুর উপর একাধিক বল প্রয়োগ হলে resultant force-এর উপর motion নির্ভর করে।",
+      formula: "Net Force = Sum of all forces",
+      units: "Newton (N)",
+      example: "বলকে racket দিয়ে আঘাত করলে তার speed ও direction পরিবর্তিত হয়।",
+      realLifeExample: "স্প্রিং চাপ দিলে তার আকার পরিবর্তিত হয়।",
+      examFocus: "বলের বিভিন্ন প্রভাব লিখতে ও উদাহরণ দিতে পারা।",
+      commonMistakes: "বল শুধু বস্তুকে চলতে শুরু করায়—এমন ধারণা করা।",
+      keyPoints: [
+        "Force motion পরিবর্তন করতে পারে।",
+        "Force direction পরিবর্তন করতে পারে।",
+        "Force shape পরিবর্তন করতে পারে।"
+      ]
+    },
+
+    {
+      id: "inertia",
+      title: "জড়তা (Inertia)",
+      definition: "কোনো বস্তু তার বর্তমান স্থিতি বা গতির অবস্থা পরিবর্তনে বাধা দেওয়ার যে ধর্ম প্রদর্শন করে তাকে জড়তা বলে।",
+      simpleExplanation: "বস্তু তার বর্তমান অবস্থাই ধরে রাখতে চায়—এটাই inertia।",
+      detailedExplanation: "Inertia বস্তুর ভরের উপর নির্ভর করে। ভর যত বেশি, জড়তা তত বেশি। জড়তার তিনটি প্রধান ধরন হলো স্থিতির জড়তা, গতির জড়তা এবং দিকের জড়তা।",
+      formula: "Inertia ∝ Mass",
+      units: "জড়তার আলাদা SI unit নেই।",
+      example: "হঠাৎ বাস চললে যাত্রী পিছনের দিকে হেলে পড়ে।",
+      realLifeExample: "গাড়িতে seat belt ব্যবহার করা inertia-এর সাথে সম্পর্কিত।",
+      examFocus: "জড়তার সংজ্ঞা, কারণ ও প্রকারভেদ।",
+      commonMistakes: "জড়তাকে force মনে করা।",
+      keyPoints: [
+        "Inertia কোনো force নয়।",
+        "Mass বাড়লে inertia বাড়ে।",
+        "Inertia-এর তিনটি প্রধান ধরন আছে।"
+      ]
+    },
+
+    {
+      id: "inertia-rest",
+      title: "স্থিতির জড়তা",
+      definition: "স্থিতিশীল বস্তু তার স্থিতি বজায় রাখতে চাওয়ার ধর্মকে স্থিতির জড়তা বলে।",
+      simpleExplanation: "স্থির বস্তু হঠাৎ নিজে থেকে চলতে চায় না।",
+      detailedExplanation: "বাহ্যিক force প্রয়োগ না করলে স্থির বস্তু স্থির অবস্থায় থাকতে চায়। বাস হঠাৎ চললে যাত্রীর শরীর পিছনে হেলে যায়, কারণ শরীর স্থির অবস্থায় থাকতে চায়।",
+      formula: "Inertia of rest ∝ Mass",
+      units: "কোনো SI unit নেই।",
+      example: "কার্পেট ঝাড়লে ধুলো বেরিয়ে যায়।",
+      realLifeExample: "বাস হঠাৎ চলা শুরু করলে যাত্রী পিছনে হেলে পড়ে।",
+      examFocus: "স্থিতির জড়তার দৈনন্দিন উদাহরণ।",
+      commonMistakes: "বাস চলার সময় যাত্রী পিছনে যাওয়াকে force-এর সরাসরি ফল ভাবা।",
+      keyPoints: [
+        "স্থির বস্তু স্থির থাকতে চায়।",
+        "বাহ্যিক বল প্রয়োজন motion পরিবর্তনের জন্য।"
+      ]
+    },
+
+    {
+      id: "inertia-motion",
+      title: "গতির জড়তা",
+      definition: "গতিশীল বস্তু তার গতির অবস্থা বজায় রাখতে চাওয়ার ধর্মকে গতির জড়তা বলে।",
+      simpleExplanation: "চলন্ত বস্তু চলতেই থাকতে চায়।",
+      detailedExplanation: "কোনো চলন্ত বস্তুর উপর প্রয়োজনীয় বাহ্যিক বল না থাকলে সেটি একই গতির অবস্থা বজায় রাখতে চায়। বাস্তবে friction-এর কারণে বস্তু ধীরে ধীরে থেমে যায়।",
+      formula: "Inertia of motion ∝ Mass",
+      units: "কোনো SI unit নেই।",
+      example: "চলন্ত বাস হঠাৎ থামলে যাত্রী সামনে ঝুঁকে পড়ে।",
+      realLifeExample: "গাড়ির seat belt যাত্রীকে সামনে ছিটকে পড়া থেকে রক্ষা করে।",
+      examFocus: "গতির জড়তার উদাহরণ।",
+      commonMistakes: "বাস থামার সাথে সাথে যাত্রীর শরীরও সঙ্গে সঙ্গে থেমে যাবে মনে করা।",
+      keyPoints: [
+        "চলন্ত বস্তু চলমান থাকতে চায়।",
+        "হঠাৎ brake করলে যাত্রী সামনে যায়।"
+      ]
+    },
+
+    {
+      id: "newton-first",
+      title: "নিউটনের প্রথম সূত্র",
+      definition: "বাহ্যিক অসম বল প্রয়োগ না করলে স্থির বস্তু স্থির এবং গতিশীল বস্তু সরলরেখায় সমবেগে চলতে থাকে।",
+      simpleExplanation: "Net external force zero হলে object তার motion state বজায় রাখে।",
+      detailedExplanation: "Newton's first law inertia-এর সূত্র নামেও পরিচিত। এখানে resultant force zero হলে acceleration zero হয়। তাই বস্তু স্থির থাকতে পারে অথবা constant velocity-তে চলতে পারে।",
+      formula: "ΣF = 0 ⇒ a = 0",
+      units: "Force: Newton (N)",
+      example: "টেবিলের উপর রাখা বই বাহ্যিক অসম বল না থাকলে স্থির থাকে।",
+      realLifeExample: "গাড়িতে seat belt inertia-এর প্রভাব কমায়।",
+      examFocus: "Newton's first law এবং inertia-এর সম্পর্ক।",
+      commonMistakes: "Net force zero মানেই বস্তু অবশ্যই স্থির—এমন ধারণা করা।",
+      keyPoints: [
+        "Net force zero হলে acceleration zero।",
+        "Object rest বা constant velocity-তে থাকতে পারে।",
+        "এটি law of inertia নামেও পরিচিত।"
+      ]
+    },
+
+    {
+      id: "newton-second",
+      title: "নিউটনের দ্বিতীয় সূত্র",
+      definition: "কোনো বস্তুর ভরবেগের পরিবর্তনের হার তার উপর প্রযুক্ত অসম বলের সমানুপাতিক এবং পরিবর্তনটি বলের দিকেই ঘটে।",
+      simpleExplanation: "বস্তুর mass ও acceleration যত বেশি, required force তত বেশি।",
+      detailedExplanation: "ধ্রুব ভরের ক্ষেত্রে Newton's second law থেকে F = ma পাওয়া যায়। এটি force-এর quantitative definition দেয় এবং numerical problem-এ ব্যাপকভাবে ব্যবহৃত হয়।",
+      formula: "F = ma",
+      units: "N = kg·m/s²",
+      example: "m = 5 kg এবং a = 2 m/s² হলে F = 10 N।",
+      realLifeExample: "ভারী গাড়িকে একই acceleration দিতে বেশি force প্রয়োজন।",
+      examFocus: "F = ma derivation ও numerical।",
+      commonMistakes: "Mass-এর unit gram রেখে সরাসরি calculation করা।",
+      keyPoints: [
+        "F = ma।",
+        "Force acceleration-এর সমানুপাতিক।",
+        "SI unit Newton।"
+      ]
+    },
+
+    {
+      id: "newton-third",
+      title: "নিউটনের তৃতীয় সূত্র",
+      definition: "প্রত্যেক ক্রিয়ার সমান ও বিপরীতমুখী প্রতিক্রিয়া আছে।",
+      simpleExplanation: "একটি বস্তু অন্য বস্তুর উপর force দিলে দ্বিতীয় বস্তুটিও প্রথমটির উপর সমান মানের বিপরীতমুখী force দেয়।",
+      detailedExplanation: "Action ও reaction একই সময়ে ঘটে এবং তারা দুটি ভিন্ন বস্তুর উপর কাজ করে। তাই তারা একে অপরকে cancel করে না।",
+      formula: "F₁₂ = −F₂₁",
+      units: "Newton (N)",
+      example: "মানুষ মাটিকে পিছনের দিকে ঠেলে দিলে মাটি মানুষকে সামনে ঠেলে দেয়।",
+      realLifeExample: "হাঁটা, সাঁতার কাটা এবং rocket propulsion Newton's third law-এর উদাহরণ।",
+      examFocus: "Action-reaction pair চিহ্নিত করা।",
+      commonMistakes: "Action ও reaction একই বস্তুর উপর কাজ করে মনে করা।",
+      keyPoints: [
+        "Action ও reaction সমান।",
+        "তাদের দিক বিপরীত।",
+        "তারা ভিন্ন দুটি বস্তুর উপর কাজ করে।"
+      ]
+    },
+
+    {
+      id: "momentum",
+      title: "ভরবেগ (Momentum)",
+      definition: "কোনো বস্তুর ভর ও বেগের গুণফলকে ভরবেগ বলে।",
+      simpleExplanation: "Mass এবং velocity একসাথে কোনো বস্তুর motion-এর পরিমাণ বোঝায়।",
+      detailedExplanation: "Momentum একটি vector quantity। ভর বা velocity বাড়লে momentum-এর magnitude বাড়ে।",
+      formula: "p = mv",
+      units: "kg·m/s",
+      example: "m = 4 kg এবং v = 3 m/s হলে p = 12 kg·m/s।",
+      realLifeExample: "দ্রুতগতির ট্রাকের momentum অনেক বেশি হওয়ায় তাকে থামাতে বেশি effort লাগে।",
+      examFocus: "p = mv এবং momentum-এর unit।",
+      commonMistakes: "Momentum-এর unit kg/m/s লেখা।",
+      keyPoints: [
+        "p = mv।",
+        "Momentum vector quantity।",
+        "SI unit kg·m/s।"
+      ]
+    },
+
+    {
+      id: "momentum-conservation",
+      title: "ভরবেগের সংরক্ষণ সূত্র",
+      definition: "বাহ্যিক অসম বলের প্রভাব না থাকলে কোনো বিচ্ছিন্ন system-এর মোট ভরবেগ অপরিবর্তিত থাকে।",
+      simpleExplanation: "Collision-এর আগে total momentum = collision-এর পরে total momentum।",
+      detailedExplanation: "দুটি বা ততোধিক বস্তুর interaction-এর ক্ষেত্রে external force negligible হলে total momentum conserved হয়। Collision ও explosion-এর problem-এ এই law ব্যবহৃত হয়।",
+      formula: "Total initial momentum = Total final momentum",
+      units: "kg·m/s",
+      example: "দুটি বস্তুর collision-এর আগে ও পরে total momentum সমান থাকে, যদি external force negligible হয়।",
+      realLifeExample: "দুটি billiard ball-এর collision।",
+      examFocus: "Collision-এর numerical ও conservation equation।",
+      commonMistakes: "External force থাকলেও momentum conservation সরাসরি প্রয়োগ করা।",
+      keyPoints: [
+        "Isolated system-এ total momentum constant।",
+        "Collision problem-এ গুরুত্বপূর্ণ।",
+        "Direction-এর sign ঠিক রাখতে হবে।"
+      ]
+    },
+
+    {
+      id: "friction",
+      title: "ঘর্ষণ বল (Friction)",
+      definition: "দুটি সংস্পর্শে থাকা পৃষ্ঠের আপেক্ষিক গতি বা গতির প্রবণতাকে বাধা দেয় যে বল তাকে ঘর্ষণ বল বলে।",
+      simpleExplanation: "দুটি surface একে অপরের উপর slide করতে চাইলে friction motion-এর বিপরীত দিকে কাজ করে।",
+      detailedExplanation: "Friction একটি contact force। Surface-এর প্রকৃতি এবং normal reaction-এর উপর friction নির্ভর করে। Static ও kinetic friction গুরুত্বপূর্ণ।",
+      formula: "Fᶠ = μN",
+      units: "Newton (N)",
+      example: "মেঝের উপর বাক্স ঠেললে friction বিপরীত দিকে কাজ করে।",
+      realLifeExample: "হাঁটা ও গাড়ির tyre-এর road grip friction-এর কারণে হয়।",
+      examFocus: "Friction-এর সংজ্ঞা, কারণ, সুবিধা ও অসুবিধা।",
+      commonMistakes: "Friction সবসময় motion-এর direction-এ কাজ করে মনে করা।",
+      keyPoints: [
+        "Friction contact force।",
+        "Relative motion বা tendency-কে বাধা দেয়।",
+        "Friction motion-এর বিরোধিতা করে।"
+      ]
+    },
+
+    {
+      id: "friction-types",
+      title: "ঘর্ষণের প্রকারভেদ",
+      definition: "বস্তুর আপেক্ষিক অবস্থার উপর ভিত্তি করে friction-কে static, limiting, sliding এবং rolling friction-এ ভাগ করা যায়।",
+      simpleExplanation: "বস্তু স্থির, slide বা roll করছে কিনা তার উপর friction-এর ধরন নির্ভর করে।",
+      detailedExplanation: "Static friction বস্তু চলা শুরু করার আগ পর্যন্ত কাজ করে। Sliding friction চলমান surface-এর মধ্যে কাজ করে। Rolling friction সাধারণত sliding friction-এর তুলনায় কম।",
+      formula: "F_static ≤ μsN\nF_kinetic = μkN",
+      units: "Newton (N)",
+      example: "চাকা rolling করলে rolling friction কাজ করে।",
+      realLifeExample: "চাকার ব্যবহার sliding friction কমিয়ে দেয়।",
+      examFocus: "Static, sliding ও rolling friction-এর তুলনা।",
+      commonMistakes: "Rolling friction সবসময় sliding friction-এর চেয়ে বেশি মনে করা।",
+      keyPoints: [
+        "Static friction motion শুরু হতে বাধা দেয়।",
+        "Sliding friction sliding motion-এর সময় কাজ করে।",
+        "Rolling friction সাধারণত কম।"
+      ]
+    },
+
+    {
+      id: "balanced-force",
+      title: "সাম্য বল ও অসাম্য বল",
+      definition: "একাধিক বলের লব্ধি শূন্য হলে তাদের balanced forces এবং লব্ধি শূন্য না হলে unbalanced forces বলা হয়।",
+      simpleExplanation: "সব force একে অপরকে balance করলে net force zero।",
+      detailedExplanation: "Balanced forces-এর ফলে acceleration হয় না। Unbalanced force থাকলে Newton's second law অনুযায়ী acceleration সৃষ্টি হয়।",
+      formula: "Balanced: ΣF = 0\nUnbalanced: ΣF ≠ 0",
+      units: "Newton (N)",
+      example: "টেবিলে স্থির বইয়ের উপর weight ও normal force পরস্পর balance করে।",
+      realLifeExample: "দড়ি টানাটানিতে দুই পক্ষ সমান force দিলে net force zero হতে পারে।",
+      examFocus: "Balanced বনাম unbalanced force।",
+      commonMistakes: "Balanced force মানেই কোনো force নেই মনে করা।",
+      keyPoints: [
+        "Balanced force থাকলেও individual forces শূন্য নয়।",
+        "Net force zero হলে acceleration zero।",
+        "Unbalanced force motion পরিবর্তন করতে পারে।"
+      ]
+    }
+  ],
+
+  questions: [
+    {
+      id: "ch3-q01",
+      conceptId: "force",
+      type: "MCQ",
+      question: "বল কোন ধরনের রাশি?",
+      options: ["Scalar", "Vector", "Dimensionless", "Constant"],
+      answer: "Vector",
+      explanation: "Force-এর মান ও দিক দুটোই আছে।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q02",
+      conceptId: "inertia",
+      type: "MCQ",
+      question: "জড়তা কোন রাশির উপর নির্ভর করে?",
+      options: ["Mass", "Temperature", "Volume only", "Time only"],
+      answer: "Mass",
+      explanation: "বস্তুর mass যত বেশি, inertia তত বেশি।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q03",
+      conceptId: "newton-first",
+      type: "MCQ",
+      question: "Newton's first law কোন ধারণার সাথে সম্পর্কিত?",
+      options: ["Inertia", "Heat", "Pressure", "Electricity"],
+      answer: "Inertia",
+      explanation: "Newton's first law-কে law of inertia বলা হয়।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q04",
+      conceptId: "newton-second",
+      type: "Numerical",
+      question: "5 kg ভরের একটি বস্তুর acceleration 4 m/s² হলে force কত?",
+      answer: "20 N",
+      explanation: "F = ma = 5 × 4 = 20 N।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q05",
+      conceptId: "newton-third",
+      type: "MCQ",
+      question: "Action ও reaction force কেমন?",
+      options: ["সমান ও বিপরীতমুখী", "অসমান ও একই দিকে", "শুধু সমান", "শুধু বিপরীত"],
+      answer: "সমান ও বিপরীতমুখী",
+      explanation: "Newton's third law অনুযায়ী action ও reaction equal and opposite।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q06",
+      conceptId: "momentum",
+      type: "Numerical",
+      question: "2 kg ভরের বস্তুর velocity 6 m/s হলে momentum কত?",
+      answer: "12 kg·m/s",
+      explanation: "p = mv = 2 × 6 = 12 kg·m/s।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q07",
+      conceptId: "momentum-conservation",
+      type: "CQ",
+      question: "ভরবেগ সংরক্ষণ সূত্রটি ব্যাখ্যা করো।",
+      answer: "বাহ্যিক অসম বল না থাকলে কোনো isolated system-এর মোট ভরবেগ অপরিবর্তিত থাকে।",
+      explanation: "Collision বা explosion-এর মতো interaction-এ এই সূত্র প্রয়োগ করা যায়।",
+      difficulty: "Medium",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q08",
+      conceptId: "friction",
+      type: "MCQ",
+      question: "Friction সাধারণত কোন দিকে কাজ করে?",
+      options: ["Relative motion-এর বিপরীতে", "সবসময় motion-এর দিকে", "উপরের দিকে", "নিচের দিকে"],
+      answer: "Relative motion-এর বিপরীতে",
+      explanation: "Friction relative motion বা তার tendency-কে oppose করে।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q09",
+      conceptId: "balanced-force",
+      type: "MCQ",
+      question: "Balanced forces-এর ক্ষেত্রে net force কত?",
+      options: ["0", "1 N", "10 N", "অসীম"],
+      answer: "0",
+      explanation: "Balanced forces-এর resultant বা net force zero।",
+      difficulty: "Easy",
+      importance: 5,
+      source: "Concept Practice"
+    },
+    {
+      id: "ch3-q10",
+      conceptId: "newton-second",
+      type: "Numerical",
+      question: "একটি 10 kg বস্তুর উপর 50 N force প্রয়োগ করা হলো। Acceleration কত?",
+      answer: "5 m/s²",
+      explanation: "a = F/m = 50/10 = 5 m/s²।",
+      difficulty: "Medium",
+      importance: 5,
+      source: "Concept Practice"
+    }
+  ],
+
+  sourcesNote: "এই chapter-এর প্রশ্নগুলো বর্তমানে Concept Practice হিসেবে দেওয়া হয়েছে। Verified Board/School প্রশ্ন পরে আলাদা source ও year tag সহ যুক্ত করা হবে।"
+};

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, {useState,useEffect,useMemo,useRef} from 'react';
 import Whiteboard from './components/Whiteboard.jsx';
-import TopicMicroDemo from './components/TopicMicroDemo.jsx';
 import PerTopicPhysicsDiagrams from './components/PerTopicPhysicsDiagrams.jsx';
 import PhysicsDiagramBoard from './components/PhysicsDiagramBoard.jsx';
+import React, {useState, useEffect, useMemo} from 'react';
+import TopicMicroDemo from './components/TopicMicroDemo.jsx';
 import {createRoot} from 'react-dom/client';
 import pdfQuestions from './data/pdfQuestions.json';
 import hyrlQuestionSource from './HYRL_Class9_Physics_MCQ_CQ.json';
@@ -329,21 +330,10 @@ function App(){
      )
    );
 
- const normalizedPdfQuestions = pdfQuestions.map((q,index) => ({
-  ...q,
-  chapter: q.chapter || q.chapterId || "",
-  id: q.id || `pdf-${index+1}`,
-  type: q.type || "MCQ",
-  source: q.source || "SSC Super Suggestions 2025 PDF",
-  concept: q.concept || "PDF Question Bank",
-  solution: q.solution || "",
-  verified: Boolean(q.verified)
-}));
-
-const allQuestions = [
+ const allQuestions = [
    ...questions,
    ...subject.chapters.flatMap(c => c.questions || []),
-   ...normalizedPdfQuestions,
+   ...pdfQuestions,
    ...hyrlQuestions
  ];
 
@@ -379,52 +369,12 @@ const allQuestions = [
  const [state,setState]=useState(load);
  const [whiteboardOpen,setWhiteboardOpen]=useState(false); const [chapterId,setChapterId]=useState('p1'); const [tab,setTab]=useState('dashboard'); const [search,setSearch]=useState('');
  const chapter=subject.chapters.find(x=>x.id===chapterId)||subject.chapters[0];
- const chapters = subject.chapters.filter(c => {
-   const q = search.trim().toLowerCase();
-
-   if (!q) return true;
-
-   const chapterText = [
-     c.no,
-     c.title,
-     c.focus,
-     ...(c.manual || []),
-     ...((c.concepts || []).flatMap(x => [
-       x.title,
-       x.definition,
-       x.simpleExplanation,
-       x.detailedExplanation,
-       x.formula,
-       x.examFocus
-     ].filter(Boolean)))
-   ].join(" ").toLowerCase();
-
-   return chapterText.includes(q);
- });
+ const chapters=subject.chapters.filter(c=>(`${c.no} ${c.title} ${c.focus}`).toLowerCase().includes(search.toLowerCase()));
  const update=(partial)=>{const n={...state,...partial};setState(n);save(n)};
  const toggleDone=()=>update({progress:{...state.progress,[chapter.id]:!state.progress[chapter.id]}});
  const completion=Math.round(Object.values(state.progress).filter(Boolean).length/subject.chapters.length*100);
  return <div className="app">
-   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search">
-        <span>⌕</span>
-        <input
-          value={search}
-          onChange={e=>setSearch(e.target.value)}
-          placeholder="Chapter / concept খুঁজুন..."
-        />
-        {search && (
-          <button
-            type="button"
-            className="search-clear-btn"
-            onClick={()=>setSearch("")}
-            title="Clear search"
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-        )}
-      </div>
-      <button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
+   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Chapter / concept খুঁজুন..."/></div><button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
    
    <Whiteboard
      chapter={chapter}
@@ -3247,42 +3197,8 @@ function Learn({chapter}) {
   const [openConcept,setOpenConcept]=useState(null);
   const [completed,setCompleted]=useState({});
 
-  // Concept progress is saved separately for every chapter.
-  const conceptProgressKey = `physics-concept-progress-${chapter.id}`;
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(conceptProgressKey) || "{}"
-      );
-
-      setCompleted(
-        saved && typeof saved === "object"
-          ? saved
-          : {}
-      );
-
-      setOpenConcept(null);
-    } catch {
-      setCompleted({});
-      setOpenConcept(null);
-    }
-  }, [chapter.id]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        conceptProgressKey,
-        JSON.stringify(completed)
-      );
-    } catch {}
-  }, [completed, conceptProgressKey]);
-
   const toggleComplete=(id)=>{
-    setCompleted(prev=>({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setCompleted(prev=>({...prev,[id]:!prev[id]}));
   };
 
   const completedCount=Object.values(completed).filter(Boolean).length;

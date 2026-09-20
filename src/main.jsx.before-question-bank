@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import Whiteboard from './components/Whiteboard.jsx';
-import TopicMicroDemo from './components/TopicMicroDemo.jsx';
 import PerTopicPhysicsDiagrams from './components/PerTopicPhysicsDiagrams.jsx';
 import PhysicsDiagramBoard from './components/PhysicsDiagramBoard.jsx';
+import React, {useState, useEffect, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import pdfQuestions from './data/pdfQuestions.json';
-import hyrlQuestionSource from './HYRL_Class9_Physics_MCQ_CQ.json';
 import {subjects, questions, sourcesNote} from './data/content';
 import {chapter1} from './data/chapter1';
 import {chapter2} from './data/chapter2';
@@ -28,286 +25,6 @@ const defaults={progress:{},notes:{},diagrams:{}};
 const load=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(storeKey)||'{}')}}catch{return defaults}};
 const save=s=>localStorage.setItem(storeKey,JSON.stringify(s));
 
-
-function normalizeChapterText(text="") {
-  return String(text)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu,"");
-}
-
-function levenshteinRatio(a,b) {
-  a = normalizeChapterText(a);
-  b = normalizeChapterText(b);
-
-  if (!a && !b) return 1;
-  if (!a || !b) return 0;
-
-  const A = Array.from(a);
-  const B = Array.from(b);
-
-  const prev = Array(B.length + 1).fill(0);
-
-  for(let j=0;j<=B.length;j++) {
-    prev[j] = j;
-  }
-
-  for(let i=1;i<=A.length;i++) {
-    const cur = [i];
-
-    for(let j=1;j<=B.length;j++) {
-      const cost = A[i-1] === B[j-1] ? 0 : 1;
-
-      cur[j] = Math.min(
-        cur[j-1] + 1,
-        prev[j] + 1,
-        prev[j-1] + cost
-      );
-    }
-
-    for(let j=0;j<cur.length;j++) {
-      prev[j] = cur[j];
-    }
-  }
-
-  const distance = prev[B.length];
-  const maxLen = Math.max(A.length,B.length);
-
-  return maxLen ? 1 - distance/maxLen : 1;
-}
-
-function mapHyrlChapter(item, chapterList) {
-
-  /*
-   * HYRL PDF chapter order is preserved.
-   * The source contains 12 chapter sections.
-   *
-   * p1  → ভৌত রাশি এবং পরিমাপ
-   * p2  → গতি
-   * p3  → বল
-   * p4  → কাজ, ক্ষমতা ও শক্তি
-   * p5  → পদার্থের অবস্থা ও চাপ
-   * p6  → বস্তুর ওপর তাপের প্রভাব
-   * p7  → তরঙ্গ ও শব্দ
-   * p8  → আলোর প্রতিফলন
-   * p9  → আলোর প্রতিসরণ
-   * p10 → স্থির বিদ্যুৎ
-   * p11 → চল বিদ্যুৎ
-   * p12 → বিদ্যুতের চৌম্বক ক্রিয়া
-   *
-   * The PDF OCR contains character corruption, so
-   * deterministic mapping is safer than fuzzy matching.
-   */
-
-  const source = String(item?.chapterSource || "");
-
-  const chapterMap = [
-    {
-      keys: [
-        "ভ ৌত রাশি",
-        "ভৌত রাশি",
-        "পশরমাপ",
-        "পরিমাপ"
-      ],
-      id: "p1"
-    },
-
-    {
-      keys: [
-        "গশত",
-        "গতি"
-      ],
-      id: "p2"
-    },
-
-    {
-      keys: [
-        "বল"
-      ],
-      id: "p3"
-    },
-
-    {
-      keys: [
-        "কাজ, ক্ষমতা",
-        "কাজ, ক্ষমতা ও িশি",
-        "ক্ষমতা ও"
-      ],
-      id: "p4"
-    },
-
-    {
-      keys: [
-        "পদার্থের অবস্থা",
-        "অবস্থা ও চাপ"
-      ],
-      id: "p5"
-    },
-
-    {
-      keys: [
-        "বস্তুর ওপর",
-        "তার্পর প্র াব"
-      ],
-      id: "p6"
-    },
-
-    {
-      keys: [
-        "তরঙ্গ",
-        "িব্দ",
-        "শব্দ"
-      ],
-      id: "p7"
-    },
-
-    {
-      keys: [
-        "আর্লার প্রশতফলন",
-        "আলোর প্রতিফলন"
-      ],
-      id: "p8"
-    },
-
-    {
-      keys: [
-        "আর্লার প্রশতসরণ",
-        "আলোর প্রতিসরণ"
-      ],
-      id: "p9"
-    },
-
-    {
-      keys: [
-        "শস্থর শবদযুৎ",
-        "স্থির বিদ্যুৎ"
-      ],
-      id: "p10"
-    },
-
-    {
-      keys: [
-        "ঢল শবদযুৎ",
-        "চল বিদ্যুৎ"
-      ],
-      id: "p11"
-    },
-
-    {
-      keys: [
-        "শবদযুর্তর ভচৌম্বক",
-        "বিদ্যুতের চৌম্বক",
-        "চৌম্বক শিয়া"
-      ],
-      id: "p12"
-    }
-  ];
-
-  const normalized = source
-    .replace(/\s+/g," ")
-    .trim()
-    .toLowerCase();
-
-  const matched = chapterMap.find(entry =>
-    entry.keys.some(key =>
-      normalized.includes(
-        key.toLowerCase()
-      )
-    )
-  );
-
-  if (matched) {
-    const chapter =
-      chapterList.find(
-        c => c.id === matched.id
-      ) || null;
-
-    return {
-      chapter,
-      score: chapter ? 1 : 0
-    };
-  }
-
-  /*
-   * Keep unmatched instead of guessing.
-   */
-  return {
-    chapter: null,
-    score: 0
-  };
-}
-
-function normalizeHyrlQuestion(item, chapterList, index) {
-  const mapped = mapHyrlChapter(item,chapterList);
-
-  return {
-    id: item.id || `hyrl-${index+1}`,
-
-    /*
-     * Existing Practice Zone expects q.chapter.
-     */
-    chapter: mapped.chapter?.id || "unmapped-suggestion",
-
-    chapterTitle: mapped.chapter?.title || item.chapterSource || "",
-
-    /*
-     * Original source remains identifiable.
-     */
-    source: "HYRL Suggestion",
-
-    sourceFile: item.source || "",
-
-    sourceType: "Suggestion / preparation material",
-
-    page: item.page ?? null,
-
-    year: item.year ?? null,
-
-    type: item.type || "",
-
-    difficulty:
-      item.difficulty === null ||
-      item.difficulty === undefined
-        ? null
-        : item.difficulty,
-
-    importance:
-      item.importance === null ||
-      item.importance === undefined
-        ? null
-        : item.importance,
-
-    /*
-     * Do not invent a concept when source has none.
-     */
-    concept: item.concept || "",
-
-    /*
-     * Existing QuestionCard uses q.q.
-     */
-    q: item.question || "",
-
-    options: Array.isArray(item.options)
-      ? item.options
-      : [],
-
-    answer: item.answer || "",
-
-    solution: item.solution || "",
-
-    stimulus: item.stimulus || "",
-
-    verified: Boolean(item.verified),
-
-    chapterMappingScore: Number(
-      mapped.score.toFixed(3)
-    ),
-
-    sourceNote:
-      item.sourceNote ||
-      "Suggestion material; not treated as verified Board-year data."
-  };
-}
-
 function App(){
  const subject={
    ...subjects[0],
@@ -320,119 +37,21 @@ function App(){
    )
  };
 
- const hyrlQuestions = (hyrlQuestionSource.questions || [])
-   .map((item,index) =>
-     normalizeHyrlQuestion(
-       item,
-       subject.chapters,
-       index
-     )
-   );
-
- const normalizedPdfQuestions = pdfQuestions.map((q,index) => ({
-  ...q,
-  chapter: q.chapter || q.chapterId || "",
-  id: q.id || `pdf-${index+1}`,
-  type: q.type || "MCQ",
-  source: q.source || "SSC Super Suggestions 2025 PDF",
-  concept: q.concept || "PDF Question Bank",
-  solution: q.solution || "",
-  verified: Boolean(q.verified)
-}));
-
-const allQuestions = [
+ const allQuestions = [
    ...questions,
    ...subject.chapters.flatMap(c => c.questions || []),
-   ...normalizedPdfQuestions,
-   ...hyrlQuestions
+   ...pdfQuestions
  ];
 
- console.log(
-   "HYRL Question Bank:",
-   hyrlQuestions.length,
-   "items"
- );
-
- console.log(
-   "HYRL MCQ:",
-   hyrlQuestions.filter(q=>q.type==="MCQ").length,
-   "CQ:",
-   hyrlQuestions.filter(q=>q.type==="CQ").length
- );
-
- console.log(
-   "HYRL mapped:",
-   hyrlQuestions.filter(
-     q=>q.chapter!=="unmapped-suggestion"
-   ).length,
-   "unmapped:",
-   hyrlQuestions.filter(
-     q=>q.chapter==="unmapped-suggestion"
-   ).length
- );
-
- console.log(
-   "TOTAL QUESTIONS:",
-   allQuestions.length
- );
-
- const [state,setState]=useState(load);
- const [whiteboardOpen,setWhiteboardOpen]=useState(false); const [chapterId,setChapterId]=useState('p1'); const [tab,setTab]=useState('dashboard'); const [search,setSearch]=useState('');
+ const [state,setState]=useState(load); const [chapterId,setChapterId]=useState('p1'); const [tab,setTab]=useState('dashboard'); const [search,setSearch]=useState('');
  const chapter=subject.chapters.find(x=>x.id===chapterId)||subject.chapters[0];
- const chapters = subject.chapters.filter(c => {
-   const q = search.trim().toLowerCase();
-
-   if (!q) return true;
-
-   const chapterText = [
-     c.no,
-     c.title,
-     c.focus,
-     ...(c.manual || []),
-     ...((c.concepts || []).flatMap(x => [
-       x.title,
-       x.definition,
-       x.simpleExplanation,
-       x.detailedExplanation,
-       x.formula,
-       x.examFocus
-     ].filter(Boolean)))
-   ].join(" ").toLowerCase();
-
-   return chapterText.includes(q);
- });
+ const chapters=subject.chapters.filter(c=>(`${c.no} ${c.title} ${c.focus}`).toLowerCase().includes(search.toLowerCase()));
  const update=(partial)=>{const n={...state,...partial};setState(n);save(n)};
  const toggleDone=()=>update({progress:{...state.progress,[chapter.id]:!state.progress[chapter.id]}});
  const completion=Math.round(Object.values(state.progress).filter(Boolean).length/subject.chapters.length*100);
  return <div className="app">
-   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search">
-        <span>⌕</span>
-        <input
-          value={search}
-          onChange={e=>setSearch(e.target.value)}
-          placeholder="Chapter / concept খুঁজুন..."
-        />
-        {search && (
-          <button
-            type="button"
-            className="search-clear-btn"
-            onClick={()=>setSearch("")}
-            title="Clear search"
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-        )}
-      </div>
-      <button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
-   
-   <Whiteboard
-     chapter={chapter}
-     open={whiteboardOpen}
-     setOpen={setWhiteboardOpen}
-   />
-
-<div className="layout"><aside className="sidebar"><div className="side-label">SUBJECT</div><div className="subject-card active"><span className="subject-icon">⚛</span><div><b>পদার্থবিজ্ঞান</b><small>নবম–দশম</small></div><strong>{subject.chapters.length}</strong></div><div className="side-label">CHAPTERS</div><div className="chapter-list">{chapters.map(c=><button key={c.id} className={`chapter ${c.id===chapter.id?'active':''}`} onClick={()=>{setChapterId(c.id);setTab('learn')}}><span className="num">{String(c.no).padStart(2,'0')}</span><span><b>{c.title}</b><small>{c.focus}</small></span>{state.progress[c.id]&&<i>✓</i>}</button>)}</div><div className="sidebar-foot"><span className="live-dot"/> Physics Lab ready</div></aside>
+   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Chapter / concept খুঁজুন..."/></div><button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
+   <div className="layout"><aside className="sidebar"><div className="side-label">SUBJECT</div><div className="subject-card active"><span className="subject-icon">⚛</span><div><b>পদার্থবিজ্ঞান</b><small>নবম–দশম</small></div><strong>{subject.chapters.length}</strong></div><div className="side-label">CHAPTERS</div><div className="chapter-list">{chapters.map(c=><button key={c.id} className={`chapter ${c.id===chapter.id?'active':''}`} onClick={()=>{setChapterId(c.id);setTab('learn')}}><span className="num">{String(c.no).padStart(2,'0')}</span><span><b>{c.title}</b><small>{c.focus}</small></span>{state.progress[c.id]&&<i>✓</i>}</button>)}</div><div className="sidebar-foot"><span className="live-dot"/> AI Tutor ready</div></aside>
    <main className="main"><section className="hero"><div><div className="eyebrow">CHAPTER {chapter.no} • STUDENT ROADMAP</div><h1>{chapter.title}</h1><p>{chapter.focus}</p></div><button className={state.progress[chapter.id]?'done-btn':'primary-btn'} onClick={toggleDone}>{state.progress[chapter.id]?'✓ Learned':'Mark as learned'}</button></section>
     <nav className="tabs"><button className={tab==='learn'?'active':''} onClick={()=>setTab('learn')}>Learn</button><button className={tab==='diagram'?'active':''} onClick={()=>setTab('diagram')}>Diagram Board</button><button className={tab==='practice'?'active':''} onClick={()=>setTab('practice')}>Practice</button><button className={tab==='exam'?'active':''} onClick={()=>setTab('exam')}>Exam Mode</button></nav>
     {tab==='dashboard'&&
@@ -3247,42 +2866,8 @@ function Learn({chapter}) {
   const [openConcept,setOpenConcept]=useState(null);
   const [completed,setCompleted]=useState({});
 
-  // Concept progress is saved separately for every chapter.
-  const conceptProgressKey = `physics-concept-progress-${chapter.id}`;
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(conceptProgressKey) || "{}"
-      );
-
-      setCompleted(
-        saved && typeof saved === "object"
-          ? saved
-          : {}
-      );
-
-      setOpenConcept(null);
-    } catch {
-      setCompleted({});
-      setOpenConcept(null);
-    }
-  }, [chapter.id]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        conceptProgressKey,
-        JSON.stringify(completed)
-      );
-    } catch {}
-  }, [completed, conceptProgressKey]);
-
   const toggleComplete=(id)=>{
-    setCompleted(prev=>({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setCompleted(prev=>({...prev,[id]:!prev[id]}));
   };
 
   const completedCount=Object.values(completed).filter(Boolean).length;
@@ -3399,8 +2984,6 @@ function Learn({chapter}) {
 
                 {isOpen && (
                   <div className="concept-content">
-
-                    <TopicMicroDemo concept={c}/>
 
                     {c.definition && (
                       <div className="learning-section">

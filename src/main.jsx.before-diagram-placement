@@ -1,0 +1,2141 @@
+import React, {useState, useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import pdfQuestions from './data/pdfQuestions.json';
+import {subjects, questions, sourcesNote} from './data/content';
+import {chapter1} from './data/chapter1';
+import {chapter2} from './data/chapter2';
+import {chapter3} from './data/chapter3';
+import {chapter4} from './data/chapter4';
+import {chapter5} from './data/chapter5';
+import {chapter6} from './data/chapter6';
+import {chapter7} from './data/chapter7';
+import {chapter8} from './data/chapter8';
+import {chapter9} from './data/chapter9';
+import {chapter10} from './data/chapter10';
+import {chapter12} from './data/chapter12';
+import {chapter13} from './data/chapter13';
+import {chapter14} from './data/chapter14';
+import {chapter11} from './data/chapter11';
+import './styles.css';
+
+const storeKey='physics-ai-v2';
+const defaults={progress:{},notes:{},diagrams:{}};
+const load=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(storeKey)||'{}')}}catch{return defaults}};
+const save=s=>localStorage.setItem(storeKey,JSON.stringify(s));
+
+function App(){
+ const subject={
+   ...subjects[0],
+   chapters: subjects[0].chapters.map(c =>
+     c.id === 'p1' ? chapter1 : c.id === 'p2' ? chapter2 : c.id === 'p3' ? chapter3 : c.id === 'p4' ? chapter4 : c.id === 'p5' ? chapter5 : c.id === 'p6' ? chapter6 : c.id === 'p7' ? chapter7 : c.id === 'p8' ? chapter8 :
+       c.id === 'p9' ? chapter9 :
+       c.id === 'p10' ? chapter10 :
+       c.id === 'p11' ? chapter11 :
+       c.id === 'p12' ? chapter12 : c.id === 'p13' ? chapter13 : c.id === 'p14' ? chapter14 : c
+   )
+ };
+
+ const allQuestions = [
+   ...questions,
+   ...subject.chapters.flatMap(c => c.questions || []),
+   ...pdfQuestions
+ ];
+
+ const [state,setState]=useState(load); const [chapterId,setChapterId]=useState('p1'); const [tab,setTab]=useState('dashboard'); const [search,setSearch]=useState('');
+ const chapter=subject.chapters.find(x=>x.id===chapterId)||subject.chapters[0];
+ const chapters=subject.chapters.filter(c=>(`${c.no} ${c.title} ${c.focus}`).toLowerCase().includes(search.toLowerCase()));
+ const update=(partial)=>{const n={...state,...partial};setState(n);save(n)};
+ const toggleDone=()=>update({progress:{...state.progress,[chapter.id]:!state.progress[chapter.id]}});
+ const completion=Math.round(Object.values(state.progress).filter(Boolean).length/subject.chapters.length*100);
+ return <div className="app">
+   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Chapter / concept খুঁজুন..."/></div><button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button><button className="dark-btn progress-top-btn" onClick={()=>setTab('progress')}>Progress & Revision</button></div></header>
+   <div className="layout"><aside className="sidebar"><div className="side-label">SUBJECT</div><div className="subject-card active"><span className="subject-icon">⚛</span><div><b>পদার্থবিজ্ঞান</b><small>নবম–দশম</small></div><strong>{subject.chapters.length}</strong></div><div className="side-label">CHAPTERS</div><div className="chapter-list">{chapters.map(c=><button key={c.id} className={`chapter ${c.id===chapter.id?'active':''}`} onClick={()=>{setChapterId(c.id);setTab('learn')}}><span className="num">{String(c.no).padStart(2,'0')}</span><span><b>{c.title}</b><small>{c.focus}</small></span>{state.progress[c.id]&&<i>✓</i>}</button>)}</div><div className="sidebar-foot"><span className="live-dot"/> Offline learning mode</div></aside>
+   <main className="main"><section className="hero"><div><div className="eyebrow">CHAPTER {chapter.no} • STUDENT ROADMAP</div><h1>{chapter.title}</h1><p>{chapter.focus}</p></div><button className={state.progress[chapter.id]?'done-btn':'primary-btn'} onClick={toggleDone}>{state.progress[chapter.id]?'✓ Learned':'Mark as learned'}</button></section>
+    <nav className="tabs"><button className={tab==='learn'?'active':''} onClick={()=>setTab('learn')}>Learn</button><button className={tab==='diagram'?'active':''} onClick={()=>setTab('diagram')}>Diagram Board</button><button className={tab==='practice'?'active':''} onClick={()=>setTab('practice')}>Practice</button><button className={tab==='exam'?'active':''} onClick={()=>setTab('exam')}>Exam Mode</button></nav>
+    {tab==='dashboard'&&
+      <Dashboard
+        subject={subject}
+        state={state}
+        completion={completion}
+        setChapterId={setChapterId}
+        setTab={setTab}
+      />
+    }
+    {tab==='learn'&&<Learn chapter={chapter}/>} {tab==='diagram'&&<DiagramBoard chapter={chapter} state={state} update={update}/>} {tab==='practice'&&<Practice chapter={chapter} chapters={subject.chapters} allQuestions={allQuestions}/>}
+    {tab==='exam'&&<ExamMode chapters={subject.chapters} allQuestions={allQuestions}/>} {tab==='progress'&&<ProgressPage chapters={subject.chapters} state={state}/>} 
+   </main></div>
+ </div>
+}
+
+
+function Dashboard({subject,state,completion,setChapterId,setTab}) {
+  const completed = subject.chapters.filter(c => state.progress[c.id]).length;
+  const current = subject.chapters.find(c => !state.progress[c.id]) || subject.chapters[0];
+
+  return (
+    <section className="dashboard-page">
+      <div className="dashboard-grid">
+
+        <section className="panel dashboard-welcome">
+          <div>
+            <span className="kicker">PHYSICS 9–10 • LEARNING HUB</span>
+            <h2>তোমার Physics Learning Dashboard</h2>
+            <p>
+              Chapter অনুযায়ী concept শেখো, diagram practice করো,
+              প্রশ্ন solve করো এবং Exam Mode দিয়ে নিজেকে যাচাই করো।
+            </p>
+          </div>
+          <div className="dashboard-progress">
+            <strong>{completion}%</strong>
+            <span>Overall Progress</span>
+          </div>
+        </section>
+
+        <div className="dashboard-stats">
+          <div className="stat-card">
+            <strong>{subject.chapters.length}</strong>
+            <span>Total Chapters</span>
+          </div>
+          <div className="stat-card">
+            <strong>{completed}</strong>
+            <span>Completed</span>
+          </div>
+          <div className="stat-card">
+            <strong>{subject.chapters.length - completed}</strong>
+            <span>Remaining</span>
+          </div>
+        </div>
+
+        <section className="panel">
+          <div className="panel-head">
+            <div>
+              <span className="kicker">CONTINUE LEARNING</span>
+              <h2>{current.title}</h2>
+            </div>
+            <button
+              className="primary-btn"
+              onClick={() => {
+                setChapterId(current.id);
+                setTab('learn');
+              }}
+            >
+              Continue →
+            </button>
+          </div>
+          <p>{current.focus}</p>
+        </section>
+
+        <section className="panel">
+          <div className="panel-head">
+            <div>
+              <span className="kicker">QUICK ACCESS</span>
+              <h2>Practice & Test</h2>
+            </div>
+          </div>
+
+          <div className="quick-actions">
+            <button onClick={() => setTab('practice')}>
+              <strong>Practice Zone</strong>
+              <span>MCQ ও CQ প্রশ্ন solve করো</span>
+            </button>
+
+            <button onClick={() => setTab('exam')}>
+              <strong>Exam Mode</strong>
+              <span>Timed test দিয়ে পরীক্ষা দাও</span>
+            </button>
+
+            <button onClick={() => setTab('diagram')}>
+              <strong>Diagram Board</strong>
+              <span>Editable diagram practice</span>
+            </button>
+
+            <button onClick={() => setTab('ai')}>
+              <strong></strong>
+              <span>Physics-এর যেকোনো doubt জিজ্ঞেস করো</span>
+            </button>
+          </div>
+        </section>
+
+        <section className="panel dashboard-chapters">
+          <div className="panel-head">
+            <div>
+              <span className="kicker">CHAPTER ROADMAP</span>
+              <h2>১৪টি Chapter</h2>
+            </div>
+          </div>
+
+          <div className="dashboard-chapter-grid">
+            {subject.chapters.map(c => (
+              <button
+                key={c.id}
+                className={`dashboard-chapter ${state.progress[c.id] ? 'completed' : ''}`}
+                onClick={() => {
+                  setChapterId(c.id);
+                  setTab('learn');
+                }}
+              >
+                <span>{String(c.no).padStart(2,'0')}</span>
+                <div>
+                  <strong>{c.title}</strong>
+                  <small>{state.progress[c.id] ? '✓ Completed' : c.focus}</small>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel dashboard-tip">
+          <span className="kicker">STUDY STRATEGY</span>
+          <h2>প্রতিদিন ১টি concept + ১০টি প্রশ্ন</h2>
+          <p>
+            আগে concept বুঝবে → তারপর formula দেখবে → diagram practice করবে
+            → শেষে MCQ/CQ solve করবে। এভাবে নিয়মিত practice করলে chapter
+            ধরে preparation track করা সহজ হবে।
+          </p>
+        </section>
+
+      </div>
+    </section>
+  );
+}
+
+
+function clampNumber(value, min, max, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+function getDiagramType(chapterTitle="", conceptTitle="") {
+  const text = `${chapterTitle} ${conceptTitle}`.toLowerCase();
+
+  if (
+    /গতি|দূরত্ব|সরণ|বেগ|দ্রুতি|ত্বরণ|motion|velocity|speed|acceleration|distance|displacement/.test(text)
+  ) return "motion";
+
+  if (
+    /তরঙ্গ|কম্পন|শব্দ|wave|vibration|sound|frequency|wavelength|amplitude/.test(text)
+  ) return "wave";
+
+  if (
+    /বিদ্যুৎ|তড়িৎ|তড়িৎ|current|voltage|resistance|circuit|ওহম|ohm|series|parallel/.test(text)
+  ) return "circuit";
+
+  if (
+    /বল|force|নিউটন|newton|ভর|mass|momentum|ঘর্ষণ|friction|weight/.test(text)
+  ) return "force";
+
+  if (
+    /লেন্স|lens|দর্পণ|mirror|ফোকাস|focus|focal|আয়না|আয়না|প্রতিচ্ছবি|image formation/.test(text)
+  ) {
+    if (/লেন্স|lens/.test(text)) return "lens";
+    return "mirror";
+  }
+
+  if (
+    /কাজ|শক্তি|ক্ষমতা|work|energy|power|kinetic|potential|গতিশক্তি|বিভব/.test(text)
+  ) return "energy";
+
+  if (
+    /তাপ|তাপমাত্রা|thermal|temperature|heat|calor|উষ্ণতা/.test(text)
+  ) return "heat";
+
+  if (
+    /পরমাণু|atom|electron|proton|neutron|nucleus|ইলেকট্রন|প্রোটন|নিউট্রন/.test(text)
+  ) return "atom";
+
+  if (
+    /চুম্বক|magnet|magnetic|field|চৌম্বক|electromagnet/.test(text)
+  ) return "magnet";
+
+  return "generic";
+}
+
+function DiagramBoard({chapter,state,update}) {
+  const detectedType = getDiagramType(chapter?.title || "", chapter?.focus || "");
+
+  const saved = state.diagrams?.[chapter.id] || {
+    type: detectedType,
+    label: chapter?.title || "Physics",
+    value1: "5",
+    value2: "10",
+    unit1: "m",
+    unit2: "s",
+    angle: "30"
+  };
+
+  const values = {
+    ...saved,
+    type: saved.type || detectedType,
+    label: saved.label || chapter?.title || "Physics",
+    value1: saved.value1 ?? "5",
+    value2: saved.value2 ?? "10",
+    unit1: saved.unit1 ?? "m",
+    unit2: saved.unit2 ?? "s",
+    angle: saved.angle ?? "30"
+  };
+
+  const setValue = (key, value) => {
+    const next = {
+      ...values,
+      [key]: value
+    };
+
+    update({
+      diagrams: {
+        ...state.diagrams,
+        [chapter.id]: next
+      }
+    });
+  };
+
+  const resetDiagram = () => {
+    update({
+      diagrams: {
+        ...state.diagrams,
+        [chapter.id]: {
+          type: detectedType,
+          label: chapter?.title || "Physics",
+          value1: "5",
+          value2: "10",
+          unit1: "m",
+          unit2: "s",
+          angle: "30"
+        }
+      }
+    });
+  };
+
+  return (
+    <section className="diagram-page">
+      <div className="panel diagram-heading">
+        <div>
+          <span className="kicker">LIVE EDITABLE DIAGRAM</span>
+          <h2>{chapter?.title || "Physics Diagram"}</h2>
+          <p>
+            নিচের মানগুলো পরিবর্তন করলেই diagram সঙ্গে সঙ্গে update হবে।
+          </p>
+        </div>
+
+        <span className="badge">
+          {values.type}
+        </span>
+      </div>
+
+      <div className="diagram-layout">
+        <div className="diagram-controls panel">
+
+          <div className="diagram-field">
+            <label>Diagram Type</label>
+            <select
+              value={values.type}
+              onChange={(e) => setValue("type", e.target.value)}
+            >
+              <option value="generic">Generic Physics</option>
+              <option value="motion">Motion</option>
+              <option value="wave">Wave</option>
+              <option value="circuit">Circuit</option>
+              <option value="force">Force</option>
+              <option value="lens">Lens</option>
+              <option value="mirror">Mirror</option>
+              <option value="energy">Energy</option>
+              <option value="heat">Heat</option>
+              <option value="atom">Atom</option>
+              <option value="magnet">Magnet</option>
+            </select>
+          </div>
+
+          <div className="diagram-field">
+            <label>Label</label>
+            <input
+              type="text"
+              value={values.label}
+              onChange={(e) => setValue("label", e.target.value)}
+              placeholder="Physics diagram"
+            />
+          </div>
+
+          <div className="diagram-field">
+            <label>Value 1</label>
+            <input
+              type="number"
+              step="0.1"
+              value={values.value1}
+              onChange={(e) => setValue("value1", e.target.value)}
+            />
+          </div>
+
+          <div className="diagram-field">
+            <label>Value 2</label>
+            <input
+              type="number"
+              step="0.1"
+              value={values.value2}
+              onChange={(e) => setValue("value2", e.target.value)}
+            />
+          </div>
+
+          <div className="diagram-field">
+            <label>Unit 1</label>
+            <input
+              type="text"
+              value={values.unit1}
+              onChange={(e) => setValue("unit1", e.target.value)}
+            />
+          </div>
+
+          <div className="diagram-field">
+            <label>Unit 2</label>
+            <input
+              type="text"
+              value={values.unit2}
+              onChange={(e) => setValue("unit2", e.target.value)}
+            />
+          </div>
+
+          <div className="diagram-field">
+            <label>Angle</label>
+            <input
+              type="number"
+              min="0"
+              max="89"
+              step="1"
+              value={values.angle}
+              onChange={(e) => setValue("angle", e.target.value)}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="dark-btn diagram-reset"
+            onClick={resetDiagram}
+          >
+            Reset Diagram
+          </button>
+
+          <div className="live-note">
+            <span className="live-dot"></span>
+            Live preview active
+          </div>
+        </div>
+
+        <div className="diagram-canvas panel">
+          <div className="live-diagram-stage">
+            <DiagramSVG type={values.type} values={values} />
+          </div>
+        </div>
+      </div>
+
+      <div className="panel diagram-topics">
+        <div className="panel-head">
+          <div>
+            <span className="kicker">CONCEPT DIAGRAMS</span>
+            <h2>এই chapter-এর concepts</h2>
+          </div>
+          <span className="badge">
+            {(chapter?.concepts || []).length} concepts
+          </span>
+        </div>
+
+        <div className="concept-diagram-mini-grid">
+          {(chapter?.concepts || []).map((concept, index) => (
+            <div className="concept-diagram-mini" key={concept.id || index}>
+              <div className="concept-diagram-mini-head">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <b>{concept.title}</b>
+              </div>
+
+              <DiagramSVG
+                type={getDiagramType(chapter?.title || "", concept?.title || "")}
+                values={{
+                  type: getDiagramType(chapter?.title || "", concept?.title || ""),
+                  label: concept?.title || "Physics",
+                  value1: "5",
+                  value2: "10",
+                  unit1: "m",
+                  unit2: "s",
+                  angle: "30"
+                }}
+                compact
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DiagramSVG({type,values,compact=false}) {
+  const v1 = clampNumber(values?.value1, 0.1, 1000, 5);
+  const v2 = clampNumber(values?.value2, 0.1, 1000, 10);
+  const angle = clampNumber(values?.angle, 0, 89, 30);
+
+  const markerId = `arrow-${String(values?.label || "physics")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0,20)}-${type}-${compact ? "c" : "b"}`;
+
+  const common = {
+    width: compact ? 420 : 700,
+    height: compact ? 260 : 380,
+    viewBox: compact ? "0 0 700 380" : "0 0 700 380",
+    className: "diagram-svg"
+  };
+
+  if (type === "motion") {
+    const rise = Math.min(220, 50 + v1 * 18);
+    const speed = Math.min(300, 50 + v2 * 10);
+
+    return (
+      <svg {...common}>
+        <defs>
+          <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" />
+          </marker>
+        </defs>
+
+        <line x1="80" y1="300" x2="620" y2="300" />
+        <line x1="100" y1="330" x2="100" y2="70" />
+
+        <path
+          d={`M100 290 Q260 ${290-rise/2} 400 ${290-rise*0.8} T620 ${290-rise}`}
+          fill="none"
+        />
+
+        <line
+          x1="170"
+          y1="240"
+          x2={170 + speed}
+          y2="240"
+          markerEnd={`url(#${markerId})`}
+        />
+
+        <circle cx="170" cy="240" r="14" className="diagram-object" />
+        <text x="130" y="365">Time</text>
+        <text x="45" y="90">Position</text>
+        <text x="185" y="225">v = {v2} {values?.unit2 || "m/s"}</text>
+        <text x="120" y="120">{values?.label || "Motion"}</text>
+      </svg>
+    );
+  }
+
+  if (type === "wave") {
+    const amp = Math.min(100, 25 + v2 * 5);
+    const wavelength = Math.max(80, 260 - v1 * 12);
+
+    let d = "M40 190";
+    for (let x = 40; x <= 660; x += 8) {
+      const y =
+        190 +
+        amp * Math.sin(((x - 40) / wavelength) * Math.PI * 2);
+      d += ` L${x} ${y}`;
+    }
+
+    return (
+      <svg {...common}>
+        <line x1="40" y1="190" x2="660" y2="190" />
+        <path d={d} fill="none" />
+        <line x1="100" y1={190-amp} x2="100" y2={190} />
+        <line x1="100" y1={190-amp} x2="150" y2={190-amp} />
+        <text x="165" y={185-amp}>Amplitude = {v2}</text>
+        <text x="250" y="225">Wavelength = {v1}</text>
+        <text x="260" y="95">{values?.label || "Wave"}</text>
+      </svg>
+    );
+  }
+
+  if (type === "circuit") {
+    const voltage = v1;
+    const resistance = Math.max(0.1, v2);
+    const current = voltage / resistance;
+    const arrowLen = Math.min(180, 40 + current * 18);
+
+    return (
+      <svg {...common}>
+        <defs>
+          <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" />
+          </marker>
+        </defs>
+
+        <line x1="120" y1="100" x2="580" y2="100" />
+        <line x1="120" y1="300" x2="580" y2="300" />
+        <line x1="120" y1="100" x2="120" y2="175" />
+        <line x1="120" y1="225" x2="120" y2="300" />
+        <line x1="580" y1="100" x2="580" y2="165" />
+        <line x1="580" y1="235" x2="580" y2="300" />
+
+        <line x1="108" y1="175" x2="108" y2="225" />
+        <line x1="132" y1="165" x2="132" y2="235" />
+
+        <rect x="335" y="82" width="100" height="36" rx="8" />
+        <text x="354" y="106">R = {resistance} Ω</text>
+
+        <line
+          x1="265"
+          y1="100"
+          x2={265 + arrowLen}
+          y2="100"
+          markerEnd={`url(#${markerId})`}
+        />
+
+        <text x="245" y="70">I = {current.toFixed(2)} A</text>
+        <text x="85" y="150">V = {voltage} V</text>
+        <text x="260" y="355">{values?.label || "Circuit"}</text>
+      </svg>
+    );
+  }
+
+  if (type === "force") {
+    const mass = Math.max(0.1, v1);
+    const force = Math.max(0.1, v2);
+    const forceLen = Math.min(220, 50 + force * 12);
+
+    const rad = angle * Math.PI / 180;
+    const x2 = 350 + forceLen * Math.cos(rad);
+    const y2 = 250 - forceLen * Math.sin(rad);
+
+    return (
+      <svg {...common}>
+        <defs>
+          <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" />
+          </marker>
+        </defs>
+
+        <line x1="90" y1="310" x2="620" y2="310" />
+        <rect x="275" y="220" width="150" height="90" rx="10" className="diagram-object" />
+
+        <line
+          x1="350"
+          y1="250"
+          x2={x2}
+          y2={y2}
+          markerEnd={`url(#${markerId})`}
+        />
+
+        <line
+          x1="350"
+          y1="250"
+          x2="350"
+          y2="150"
+          markerEnd={`url(#${markerId})`}
+        />
+
+        <text x="305" y="270">m = {mass} kg</text>
+        <text x={x2 - 30} y={y2 - 10}>F = {force} N</text>
+        <text x="355" y="145">Weight</text>
+        <text x="300" y="350">θ = {angle}°</text>
+        <text x="270" y="70">{values?.label || "Force"}</text>
+      </svg>
+    );
+  }
+
+  if (type === "lens" || type === "mirror") {
+    const u = Math.max(1, v1);
+    const f = Math.max(0.5, v2);
+
+    const objectX = 140;
+    const opticalX = 350;
+    const imageX = type === "lens"
+      ? Math.min(610, opticalX + Math.max(40, (u * f) / Math.max(1, u - f) * 18))
+      : Math.max(60, opticalX - Math.max(40, (u * f) / Math.max(1, Math.abs(u - f)) * 10));
+
+    const imageH = Math.min(130, 30 + Math.abs(v2) * 5);
+
+    return (
+      <svg viewBox="0 0 700 420" className="diagram-svg">
+        <line x1="60" y1="210" x2="640" y2="210" />
+
+        {type === "lens" ? (
+          <>
+            <path d="M345 90 Q365 210 345 330 Q335 300 335 210 Q335 120 345 90" />
+            <path d="M355 90 Q335 210 355 330 Q365 300 365 210 Q365 120 355 90" />
+            <text x="315" y="70">Lens</text>
+          </>
+        ) : (
+          <>
+            <path d="M350 70 Q300 210 350 350" fill="none" />
+            <line x1="355" y1="70" x2="355" y2="350" />
+            <text x="300" y="55">Concave / Mirror</text>
+          </>
+        )}
+
+        <line x1={objectX} y1="210" x2={objectX} y2={210-imageH} />
+        <line x1={objectX-16} y1={210-imageH} x2={objectX+16} y2={210-imageH} />
+        <text x={objectX-35} y={185-imageH}>Object</text>
+
+        <line x1={imageX} y1="210" x2={imageX} y2={210-imageH} />
+        <line x1={imageX-16} y1={210-imageH} x2={imageX+16} y2={210-imageH} />
+        <text x={imageX-25} y={190-imageH}>Image</text>
+
+        <line x1={objectX} y1={210-imageH} x2={imageX} y2={210-imageH/2} />
+        <line x1={objectX} y1={210} x2={imageX} y2={210-imageH/2} />
+
+        <text x="85" y="385">u = {u}</text>
+        <text x="270" y="385">f = {f}</text>
+        <text x="480" y="385">{values?.label || type}</text>
+      </svg>
+    );
+  }
+
+  if (type === "energy") {
+    const mass = Math.max(0.1, v1);
+    const height = Math.max(0.1, v2);
+    const g = 9.8;
+    const pe = mass * g * height;
+    const bar = Math.min(240, 30 + pe / 8);
+
+    return (
+      <svg viewBox="0 0 700 400" className="diagram-svg">
+        <line x1="120" y1="330" x2="580" y2="330" />
+        <rect x="180" y={330-bar} width="130" height={bar} className="energy-bar" />
+        <text x="195" y="355">Potential Energy</text>
+        <text x="185" y={315-bar}>mgh = {pe.toFixed(1)} J</text>
+
+        <rect x="410" y="245" width="80" height="80" rx="8" className="diagram-object" />
+        <line x1="450" y1="245" x2="450" y2="120" />
+        <text x="395" y="105">h = {height} m</text>
+        <text x="405" y="215">m = {mass} kg</text>
+        <text x="275" y="70">{values?.label || "Energy"}</text>
+      </svg>
+    );
+  }
+
+  if (type === "heat") {
+    const temperature = clampNumber(v1, -100, 200, 25);
+    const fill = Math.min(240, Math.max(10, (temperature + 50) * 1.5));
+
+    return (
+      <svg viewBox="0 0 700 400" className="diagram-svg">
+        <rect x="315" y="80" width="70" height="240" rx="35" className="thermometer" />
+        <circle cx="350" cy="330" r="45" className="thermometer" />
+        <rect x="335" y={300-fill/2} width="30" height={Math.min(180, fill/2)} rx="15" />
+        <circle cx="350" cy="330" r="25" />
+        <text x="420" y="200">
+          T = {temperature}°C
+        </text>
+        <text x="250" y="55">{values?.label || "Heat"}</text>
+        <line x1="400" y1="100" x2="400" y2="320" />
+        <text x="410" y="110">100°C</text>
+        <text x="410" y="215">50°C</text>
+        <text x="410" y="320">0°C</text>
+      </svg>
+    );
+  }
+
+  if (type === "atom") {
+    const electrons = Math.max(1, Math.min(12, Math.round(v1)));
+    const shell1 = Math.min(2, electrons);
+    const shell2 = Math.max(0, electrons - shell1);
+
+    const positions = [];
+
+    for (let i = 0; i < shell1; i++) {
+      const a = (i / Math.max(1, shell1)) * Math.PI * 2;
+      positions.push({
+        x: 350 + 85 * Math.cos(a),
+        y: 200 + 85 * Math.sin(a)
+      });
+    }
+
+    for (let i = 0; i < shell2; i++) {
+      const a = (i / Math.max(1, shell2)) * Math.PI * 2;
+      positions.push({
+        x: 350 + 155 * Math.cos(a),
+        y: 200 + 155 * Math.sin(a)
+      });
+    }
+
+    return (
+      <svg viewBox="0 0 700 400" className="diagram-svg">
+        <circle cx="350" cy="200" r="34" className="nucleus" />
+        <text x="337" y="205">N</text>
+        <circle cx="350" cy="200" r="85" className="atom-shell" />
+        <circle cx="350" cy="200" r="155" className="atom-shell" />
+
+        {positions.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r="8"
+            className="electron"
+          />
+        ))}
+
+        <text x="275" y="55">{values?.label || "Atom"}</text>
+        <text x="270" y="365">Electrons = {electrons}</text>
+      </svg>
+    );
+  }
+
+  if (type === "magnet") {
+    const strength = clampNumber(v1, 1, 20, 5);
+    const spread = Math.max(20, 60 - strength * 2);
+
+    return (
+      <svg viewBox="0 0 700 400" className="diagram-svg">
+        <rect x="275" y="165" width="70" height="70" rx="8" />
+        <rect x="355" y="165" width="70" height="70" rx="8" />
+        <text x="298" y="207">N</text>
+        <text x="380" y="207">S</text>
+
+        {[0,1,2,3,4].map((i) => (
+          <path
+            key={i}
+            d={`M${275-i*spread} 165
+                Q350 ${45-i*10} ${425+i*spread} 165`}
+            fill="none"
+            className="field-line"
+          />
+        ))}
+
+        {[0,1,2,3,4].map((i) => (
+          <path
+            key={`b${i}`}
+            d={`M${275-i*spread} 235
+                Q350 ${355+i*10} ${425+i*spread} 235`}
+            fill="none"
+            className="field-line"
+          />
+        ))}
+
+        <text x="250" y="70">Magnetic field</text>
+        <text x="285" y="320">Strength = {strength}</text>
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 700 400" className="diagram-svg">
+      <defs>
+        <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" />
+        </marker>
+      </defs>
+
+      <rect
+        x={220}
+        y={150}
+        width={Math.min(180, 80 + v1 * 8)}
+        height={Math.min(120, 50 + v1 * 5)}
+        rx="12"
+        className="diagram-object"
+      />
+
+      <line
+        x1="180"
+        y1="210"
+        x2={180 + Math.min(220, 50 + v2 * 12)}
+        y2="210"
+        markerEnd={`url(#${markerId})`}
+      />
+
+      <text x="255" y="100">{values?.label || "Physics"}</text>
+      <text x="230" y="305">
+        Value 1 = {values?.value1} {values?.unit1}
+      </text>
+      <text x="230" y="330">
+        Value 2 = {values?.value2} {values?.unit2}
+      </text>
+    </svg>
+  );
+}
+
+function ConceptDiagram({concept,chapter}) {
+  const type = getDiagramType(
+    chapter?.title || "",
+    concept?.title || ""
+  );
+
+  const defaults = {
+    type,
+    label: concept?.title || "Physics",
+    value1: "5",
+    value2: "10",
+    unit1: "m",
+    unit2: "s",
+    angle: "30"
+  };
+
+  return (
+    <div className="concept-live-diagram">
+      <div className="concept-live-diagram-head">
+        <span>LIVE DIAGRAM</span>
+        <b>{type}</b>
+      </div>
+
+      <DiagramSVG
+        type={type}
+        values={defaults}
+        compact
+      />
+    </div>
+  );
+}
+
+function Learn({chapter}) {
+  const [openConcept,setOpenConcept]=useState(null);
+  const [completed,setCompleted]=useState({});
+
+  const toggleComplete=(id)=>{
+    setCompleted(prev=>({...prev,[id]:!prev[id]}));
+  };
+
+  const completedCount=Object.values(completed).filter(Boolean).length;
+  const total=chapter.concepts?.length||0;
+  const percent=total ? Math.round(completedCount/total*100) : 0;
+
+  return (
+    <div className="learning-page">
+
+      {/* STUDY ROADMAP */}
+      <section className="panel learning-roadmap">
+
+        <div className="panel-head">
+          <div>
+            <span className="kicker">TEACHER / STUDENT ROADMAP</span>
+            <h2>এই chapter কীভাবে পড়বে?</h2>
+          </div>
+
+          <span className="badge">
+            {completedCount}/{total} concepts
+          </span>
+        </div>
+
+        <div className="roadmap-progress">
+          <div className="roadmap-progress-top">
+            <span>Learning progress</span>
+            <b>{percent}%</b>
+          </div>
+
+          <div className="progress-track">
+            <div
+              className="progress-fill"
+              style={{width:`${percent}%`}}
+            />
+          </div>
+        </div>
+
+        <div className="manual-list learning-manual">
+          {(chapter.manual || []).map((item,index)=>(
+            <div key={index} className="manual-step">
+              <span>{index+1}</span>
+              <p>{item}</p>
+            </div>
+          ))}
+        </div>
+
+      </section>
+
+      {/* CONCEPTS */}
+      <section className="panel concepts learning-concepts">
+
+        <div className="panel-head">
+          <div>
+            <span className="kicker">CORE CONCEPTS</span>
+            <h2>Concept-by-concept learning</h2>
+          </div>
+
+          <span className="badge">
+            {total} concepts
+          </span>
+        </div>
+
+        <div className="concept-instruction">
+          <span>💡</span>
+          <p>
+            প্রথমে concept-এর title পড়ো। তারপর <b>Open Concept</b> চাপ দিয়ে
+            বিস্তারিত explanation, formula, example এবং exam focus দেখো।
+          </p>
+        </div>
+
+        <div className="learning-concept-list">
+
+          {(chapter.concepts || []).map((c,index)=>{
+
+            const isOpen=openConcept===c.id;
+            const isDone=Boolean(completed[c.id]);
+
+            return (
+              <article
+                className={`learning-concept ${isOpen?'open':''} ${isDone?'learned':''}`}
+                key={c.id}
+              >
+
+                <button
+                  type="button"
+                  className="concept-header"
+                  onClick={()=>setOpenConcept(isOpen?null:c.id)}
+                >
+
+                  <span className="concept-index">
+                    {String(index+1).padStart(2,'0')}
+                  </span>
+
+                  <span className="concept-title-area">
+                    <span className="concept-title">
+                      {c.title}
+                    </span>
+
+                    <span className="concept-preview">
+                      {c.definition ||
+                       c.simpleExplanation ||
+                       'এই concept সম্পর্কে বিস্তারিত শিখতে Open Concept চাপো।'}
+                    </span>
+                  </span>
+
+                  <span className="concept-header-right">
+                    {isDone && <span className="learned-badge">✓ Learned</span>}
+                    <span className="concept-arrow">
+                      {isOpen?'−':'+'}
+                    </span>
+                  </span>
+
+                </button>
+
+                <ConceptDiagram concept={c} chapter={chapter} />
+
+                {isOpen && (
+                  <div className="concept-content">
+
+                    {c.definition && (
+                      <div className="learning-section">
+                        <span className="section-label">সংজ্ঞা</span>
+                        <p>{c.definition}</p>
+                      </div>
+                    )}
+
+                    {c.simpleExplanation && (
+                      <div className="learning-section simple">
+                        <span className="section-label">সহজ ভাষায়</span>
+                        <p>{c.simpleExplanation}</p>
+                      </div>
+                    )}
+
+                    {c.detailedExplanation && (
+                      <div className="learning-section">
+                        <span className="section-label">বিস্তারিত ব্যাখ্যা</span>
+                        <p>{c.detailedExplanation}</p>
+                      </div>
+                    )}
+
+                    {c.formula && (
+                      <div className="learning-formula">
+                        <span>FORMULA</span>
+                        <code>{c.formula}</code>
+                      </div>
+                    )}
+
+                    {c.units && (
+                      <div className="learning-section">
+                        <span className="section-label">Unit</span>
+                        <p>{c.units}</p>
+                      </div>
+                    )}
+
+                    {c.example && (
+                      <div className="learning-section example">
+                        <span className="section-label">উদাহরণ</span>
+                        <p>{c.example}</p>
+                      </div>
+                    )}
+
+                    {c.realLifeExample && (
+                      <div className="learning-section real-life">
+                        <span className="section-label">বাস্তব জীবনের উদাহরণ</span>
+                        <p>{c.realLifeExample}</p>
+                      </div>
+                    )}
+
+                    {c.examFocus && (
+                      <div className="learning-section exam-focus">
+                        <span className="section-label">EXAM FOCUS</span>
+                        <p>{c.examFocus}</p>
+                      </div>
+                    )}
+
+                    {c.commonMistakes && (
+                      <div className="learning-section common-mistake">
+                        <span className="section-label">COMMON MISTAKE</span>
+                        <p>{c.commonMistakes}</p>
+                      </div>
+                    )}
+
+                    {c.keyPoints && (
+                      <div className="learning-section key-points">
+                        <span className="section-label">মনে রাখবে</span>
+                        <ul>
+                          {c.keyPoints.map((point,i)=>(
+                            <li key={i}>{point}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="concept-actions">
+
+                      <button
+                        type="button"
+                        className={isDone?'learned-btn':'mark-concept-btn'}
+                        onClick={()=>toggleComplete(c.id)}
+                      >
+                        {isDone?'✓ Concept Learned':'Mark as Learned'}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="collapse-btn"
+                        onClick={()=>setOpenConcept(null)}
+                      >
+                        Collapse
+                      </button>
+
+                    </div>
+
+                  </div>
+                )}
+
+              </article>
+            );
+          })}
+
+        </div>
+
+      </section>
+
+      {/* STUDY FLOW */}
+      <section className="learning-flow">
+
+        <div>
+          <span>01</span>
+          <b>Concept</b>
+          <small>Understand the idea</small>
+        </div>
+
+        <strong>→</strong>
+
+        <div>
+          <span>02</span>
+          <b>Formula</b>
+          <small>Learn the equation</small>
+        </div>
+
+        <strong>→</strong>
+
+        <div>
+          <span>03</span>
+          <b>Diagram</b>
+          <small>Visualize it</small>
+        </div>
+
+        <strong>→</strong>
+
+        <div>
+          <span>04</span>
+          <b>Practice</b>
+          <small>Solve questions</small>
+        </div>
+
+      </section>
+
+    </div>
+  );
+}
+
+function QuestionPanel({chapter}){const qs=questions.filter(q=>q.chapter===chapter.id).sort((a,b)=>b.importance-a.importance||b.year-a.year);return <section className="panel question-panel"><div className="panel-head"><div><span className="kicker">QUESTIONS ATTACHED TO CONCEPTS</span><h2>এই chapter-এর প্রশ্ন + solve</h2></div><span className="badge">{qs.length} sample</span></div><div className="question-list">{qs.map(q=><QuestionCard q={q} key={q.id}/>)}</div></section>}
+function Practice({chapter,chapters,allQuestions}){
+ const [scope,setScope]=useState('all');
+ const [type,setType]=useState('all');
+ const [year,setYear]=useState('all');
+ const [importance,setImportance]=useState('all');
+ const [query,setQuery]=useState('');
+ const [bookmarks,setBookmarks]=useState(()=>{
+   try{return JSON.parse(localStorage.getItem('physics-bookmarks')||'[]')}
+   catch{return []}
+ });
+ const [showBookmarks,setShowBookmarks]=useState(false);
+
+ const toggleBookmark=(id)=>{
+   const next=bookmarks.includes(id)
+     ? bookmarks.filter(x=>x!==id)
+     : [...bookmarks,id];
+   setBookmarks(next);
+   localStorage.setItem('physics-bookmarks',JSON.stringify(next));
+ };
+
+ const years=[...new Set(allQuestions.map(q=>q.year).filter(Boolean))]
+   .map(String)
+   .sort((a,b)=>Number(b)-Number(a));
+
+ const qs=allQuestions
+   .filter(q=>{
+     const qChapter=q.chapterId || q.chapter;
+     const qType=String(q.type||'').toUpperCase();
+     const text=String(
+       `${q.q||''} ${q.concept||''} ${q.chapterTitle||''} ${q.source||''}`
+     ).toLowerCase();
+
+     const matchesScope=scope==='all'||qChapter===scope;
+     const matchesType=type==='all'||qType===type;
+     const matchesYear=year==='all'||String(q.year)===year;
+     const matchesImportance=
+       importance==='all' ||
+       (importance==='high' && Number(q.importance)>=3) ||
+       (importance==='medium' && Number(q.importance)===2);
+     const matchesSearch=!query||text.includes(query.toLowerCase());
+     const matchesBookmark=!showBookmarks||bookmarks.includes(q.id);
+
+     return matchesScope&&matchesType&&matchesYear&&
+       matchesImportance&&matchesSearch&&matchesBookmark;
+   })
+   .sort((a,b)=>
+     (Number(b.importance)||0)-(Number(a.importance)||0) ||
+     (Number(b.year)||0)-(Number(a.year)||0)
+   );
+
+ const mcqCount=qs.filter(q=>String(q.type||'').toUpperCase()==='MCQ').length;
+ const cqCount=qs.filter(q=>String(q.type||'').toUpperCase()==='CQ').length;
+
+ const reset=()=>{
+   setScope('all');
+   setType('all');
+   setYear('all');
+   setImportance('all');
+   setQuery('');
+   setShowBookmarks(false);
+ };
+
+ return (
+  <div className="question-bank">
+   <section className="qb-hero">
+    <div>
+     <span className="kicker">PRACTICE ZONE • QUESTION BANK</span>
+     <h2>প্রশ্ন ব্যাংক</h2>
+     <p>MCQ, CQ, previous questions এবং concept-based practice এক জায়গায়।</p>
+    </div>
+    <div className="qb-total">
+     <b>{allQuestions.length}</b>
+     <span>Total Questions</span>
+    </div>
+   </section>
+
+   <section className="qb-toolbar">
+    <div className="qb-search">
+     <span>⌕</span>
+     <input
+       value={query}
+       onChange={e=>setQuery(e.target.value)}
+       placeholder="প্রশ্ন / concept / source খুঁজুন..."
+     />
+    </div>
+
+    <div className="qb-filters">
+     <select value={scope} onChange={e=>setScope(e.target.value)}>
+      <option value="all">সব Chapter</option>
+      {chapters.map(c=><option key={c.id} value={c.id}>
+       Chapter {c.no} — {c.title}
+      </option>)}
+     </select>
+
+     <select value={type} onChange={e=>setType(e.target.value)}>
+      <option value="all">MCQ + CQ</option>
+      <option value="MCQ">শুধু MCQ</option>
+      <option value="CQ">শুধু CQ</option>
+     </select>
+
+     <select value={year} onChange={e=>setYear(e.target.value)}>
+      <option value="all">সব Year</option>
+      {years.map(y=><option key={y} value={y}>{y}</option>)}
+     </select>
+
+     <select value={importance} onChange={e=>setImportance(e.target.value)}>
+      <option value="all">সব Importance</option>
+      <option value="high">High Priority</option>
+      <option value="medium">Medium Priority</option>
+     </select>
+    </div>
+
+    <div className="qb-actions">
+     <button
+       className={showBookmarks?'filter-active':''}
+       onClick={()=>setShowBookmarks(!showBookmarks)}
+     >
+       ★ Bookmarks ({bookmarks.length})
+     </button>
+     <button onClick={reset}>Reset</button>
+    </div>
+   </section>
+
+   <section className="qb-stats">
+    <div><b>{qs.length}</b><span>Showing</span></div>
+    <div><b>{mcqCount}</b><span>MCQ</span></div>
+    <div><b>{cqCount}</b><span>CQ</span></div>
+    <div><b>{bookmarks.length}</b><span>Saved</span></div>
+   </section>
+
+   <div className="qb-list">
+    {qs.length ? qs.map(q=>
+      <QuestionCard
+        q={q}
+        key={q.id}
+        bookmarked={bookmarks.includes(q.id)}
+        onBookmark={()=>toggleBookmark(q.id)}
+      />
+    ) : (
+      <div className="qb-empty">
+       <div>∅</div>
+       <h3>কোনো প্রশ্ন পাওয়া যায়নি</h3>
+       <p>Filter বা search পরিবর্তন করে আবার চেষ্টা করো।</p>
+       <button onClick={reset}>সব Filter Reset</button>
+      </div>
+    )}
+   </div>
+  </div>
+ )
+}
+
+
+const studyBookKey='physics-study-book-v1';
+
+function loadStudyBook(){
+  try{
+    return JSON.parse(
+      localStorage.getItem(studyBookKey) ||
+      '{"mistakes":[],"revision":[]}'
+    );
+  }catch{
+    return {mistakes:[],revision:[]};
+  }
+}
+
+function saveStudyBook(book){
+  localStorage.setItem(
+    studyBookKey,
+    JSON.stringify(book)
+  );
+  window.dispatchEvent(
+    new Event('physics-study-updated')
+  );
+}
+
+function todayISO(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function addDaysISO(days){
+  const d=new Date();
+  d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+
+function studyQuestionSnapshot(q){
+  return {
+    id:String(q.id),
+    q:q.q,
+    type:q.type||'',
+    year:q.year||'',
+    source:q.source||'PDF Question Bank',
+    concept:q.concept||'Physics',
+    chapterId:q.chapterId||q.chapter||'',
+    answer:q.answer||'',
+    solution:q.solution||'',
+    options:q.options||[]
+  };
+}
+
+function StudyControls({q}){
+  const [,refresh]=useState(0);
+  const id=String(q.id);
+  const book=loadStudyBook();
+
+  const mistake=book.mistakes.some(
+    x=>String(x.id)===id
+  );
+
+  const revision=book.revision.find(
+    x=>String(x.id)===id
+  );
+
+  const toggleMistake=()=>{
+    const b=loadStudyBook();
+
+    if(b.mistakes.some(x=>String(x.id)===id)){
+      b.mistakes=b.mistakes.filter(
+        x=>String(x.id)!==id
+      );
+    }else{
+      b.mistakes.push({
+        ...studyQuestionSnapshot(q),
+        addedAt:todayISO()
+      });
+    }
+
+    saveStudyBook(b);
+    refresh(v=>v+1);
+  };
+
+  const addRevision=(days)=>{
+    const b=loadStudyBook();
+
+    b.revision=b.revision.filter(
+      x=>String(x.id)!==id
+    );
+
+    b.revision.push({
+      ...studyQuestionSnapshot(q),
+      addedAt:todayISO(),
+      nextReview:addDaysISO(days),
+      interval:days
+    });
+
+    saveStudyBook(b);
+    refresh(v=>v+1);
+  };
+
+  const removeRevision=()=>{
+    const b=loadStudyBook();
+
+    b.revision=b.revision.filter(
+      x=>String(x.id)!==id
+    );
+
+    saveStudyBook(b);
+    refresh(v=>v+1);
+  };
+
+  return (
+    <div className="study-actions">
+
+      <button
+        type="button"
+        className={`study-btn ${mistake?'active':''}`}
+        onClick={toggleMistake}
+      >
+        {mistake
+          ? '✓ Mistake Book-এ আছে'
+          : '+ Mistake Book'}
+      </button>
+
+      {revision ? (
+        <button
+          type="button"
+          className="study-btn active"
+          onClick={removeRevision}
+        >
+          ✓ Revision: {revision.nextReview}
+        </button>
+      ) : (
+        <>
+          <button
+            type="button"
+            className="study-btn"
+            onClick={()=>addRevision(1)}
+          >
+            Revision 1d
+          </button>
+
+          <button
+            type="button"
+            className="study-btn"
+            onClick={()=>addRevision(3)}
+          >
+            Revision 3d
+          </button>
+
+          <button
+            type="button"
+            className="study-btn"
+            onClick={()=>addRevision(7)}
+          >
+            Revision 7d
+          </button>
+        </>
+      )}
+
+    </div>
+  );
+}
+
+function QuestionCard({q,bookmarked,onBookmark}){
+ const [open,setOpen]=useState(false);
+ const type=String(q.type||'').toUpperCase();
+ const hasAnswer=Boolean(q.answer && String(q.answer).trim());
+ const priority=Number(q.importance)||0;
+
+ return (
+  <article className={`qcard-enhanced ${open?'opened':''}`}>
+   <div className="q-top">
+    <div className="q-meta-new">
+     <span>{q.year || 'Year not specified'}</span>
+     <span>{q.source || 'Question Bank'}</span>
+     <span className={`q-type ${type==='MCQ'?'mcq':'cq'}`}>
+      {type || 'QUESTION'}
+     </span>
+     {priority>=3 && <span className="priority-high">HIGH</span>}
+    </div>
+
+    <button
+      type="button"
+      className={`bookmark-btn ${bookmarked?'saved':''}`}
+      onClick={onBookmark}
+      title="Bookmark"
+    >
+      {bookmarked?'★':'☆'}
+    </button>
+   </div>
+
+   {q.concept && <div className="q-concept">Concept: {q.concept}</div>}
+
+   <h3>{q.q}</h3>
+
+      <StudyControls q={q}/>
+
+   {q.options && (
+    <div className="options enhanced-options">
+     {q.options.map((o,i)=>
+      <div className="option-row" key={`${q.id}-opt-${i}`}>
+       <span>{String.fromCharCode(0x0995+i)})</span>
+       <span>{o}</span>
+      </div>
+     )}
+    </div>
+   )}
+
+   <div className="q-footer">
+    <button
+      type="button"
+      className="solution-btn"
+      onClick={()=>setOpen(!open)}
+    >
+      {open ? '▲ Solution hide' : '▼ Answer / Solution দেখুন'}
+    </button>
+
+    <span className="source-label">
+      {hasAnswer?'Answer available':'Answer not available'}
+    </span>
+   </div>
+
+   {open && (
+    <div className="solution enhanced-solution">
+     <div>
+      <b>Answer:</b>{' '}
+      {hasAnswer
+       ? q.answer
+       : 'এই প্রশ্নের উত্তর source-এ পাওয়া যায়নি।'}
+     </div>
+
+     {q.solution && (
+      <div className="solution-detail">
+       <b>Solution:</b>
+       <p>{q.solution}</p>
+      </div>
+     )}
+
+     {!hasAnswer && !q.solution && (
+      <div className="solution-note">
+       Source-এ answer/solution না থাকায় এখানে নতুন উত্তর তৈরি করা হয়নি।
+      </div>
+     )}
+    </div>
+   )}
+  </article>
+ )
+}
+
+
+
+function ProgressPage({chapters,state}){
+
+  const [book,setBook]=useState(loadStudyBook());
+
+  React.useEffect(()=>{
+    const reload=()=>{
+      setBook(loadStudyBook());
+    };
+
+    window.addEventListener(
+      'physics-study-updated',
+      reload
+    );
+
+    return ()=>{
+      window.removeEventListener(
+        'physics-study-updated',
+        reload
+      );
+    };
+  },[]);
+
+  const learned=chapters.filter(
+    c=>Boolean(state.progress?.[c.id])
+  ).length;
+
+  const completion=Math.round(
+    learned/Math.max(chapters.length,1)*100
+  );
+
+  const today=todayISO();
+
+  const due=book.revision.filter(
+    item=>item.nextReview<=today
+  );
+
+  const finishRevision=(id)=>{
+    const b=loadStudyBook();
+
+    b.revision=b.revision.map(
+      item=>String(item.id)===String(id)
+        ? {
+            ...item,
+            nextReview:addDaysISO(7),
+            interval:7
+          }
+        : item
+    );
+
+    saveStudyBook(b);
+    setBook(b);
+  };
+
+  const removeMistake=(id)=>{
+    const b=loadStudyBook();
+
+    b.mistakes=b.mistakes.filter(
+      item=>String(item.id)!==String(id)
+    );
+
+    saveStudyBook(b);
+    setBook(b);
+  };
+
+  return (
+    <div className="progress-page">
+
+      <section className="progress-hero">
+
+        <div>
+          <span className="eyebrow">
+            PROGRESS CENTER
+          </span>
+
+          <h1>
+            তোমার Physics Journey
+          </h1>
+
+          <p>
+            Learning progress, Mistake Book
+            এবং Revision এক জায়গায়।
+          </p>
+        </div>
+
+        <div className="big-progress">
+          <strong>{completion}%</strong>
+          <span>Course Complete</span>
+        </div>
+
+      </section>
+
+      <div className="progress-stats">
+
+        <div className="progress-stat">
+          <span>Learned Chapters</span>
+          <b>{learned}/{chapters.length}</b>
+        </div>
+
+        <div className="progress-stat">
+          <span>Mistake Book</span>
+          <b>{book.mistakes.length}</b>
+        </div>
+
+        <div className="progress-stat">
+          <span>Total Revision</span>
+          <b>{book.revision.length}</b>
+        </div>
+
+        <div className="progress-stat danger">
+          <span>Due Today</span>
+          <b>{due.length}</b>
+        </div>
+
+      </div>
+
+      <section className="panel">
+
+        <div className="panel-head">
+          <div>
+            <span className="kicker">
+              CHAPTER PROGRESS
+            </span>
+
+            <h2>
+              Chapter-wise progress
+            </h2>
+          </div>
+        </div>
+
+        <div className="chapter-progress-list">
+
+          {chapters.map(c=>{
+
+            const done=Boolean(
+              state.progress?.[c.id]
+            );
+
+            return (
+              <div
+                className="chapter-progress-row"
+                key={c.id}
+              >
+
+                <div>
+                  <b>
+                    Chapter {c.no} — {c.title}
+                  </b>
+
+                  <small>
+                    {done
+                      ? 'Completed'
+                      : 'Not completed yet'}
+                  </small>
+                </div>
+
+                <div className="mini-progress">
+                  <div
+                    className={done?'done':''}
+                    style={{
+                      width:done?'100%':'0%'
+                    }}
+                  />
+                </div>
+
+                <span>
+                  {done?'100%':'0%'}
+                </span>
+
+              </div>
+            );
+
+          })}
+
+        </div>
+
+      </section>
+
+      <section className="panel">
+
+        <div className="panel-head">
+          <div>
+            <span className="kicker">
+              REVISION QUEUE
+            </span>
+
+            <h2>
+              আজকের Revision
+            </h2>
+          </div>
+
+          <span className="badge">
+            {due.length} due
+          </span>
+        </div>
+
+        {due.length ? (
+
+          <div className="progress-list">
+
+            {due.map(item=>(
+              <div
+                className="progress-item"
+                key={`due-${item.id}`}
+              >
+
+                <div>
+
+                  <div className="item-meta">
+                    <span>
+                      {item.type||'QUESTION'}
+                    </span>
+
+                    <span>
+                      {item.year||'—'}
+                    </span>
+
+                    <span>
+                      {item.concept||'Physics'}
+                    </span>
+                  </div>
+
+                  <h3>{item.q}</h3>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={()=>
+                    finishRevision(item.id)
+                  }
+                >
+                  Review Done
+                </button>
+
+              </div>
+            ))}
+
+          </div>
+
+        ) : (
+
+          <div className="note-box">
+            আজ কোনো revision due নেই।
+          </div>
+
+        )}
+
+      </section>
+
+      <section className="panel">
+
+        <div className="panel-head">
+
+          <div>
+            <span className="kicker">
+              MISTAKE BOOK
+            </span>
+
+            <h2>
+              যে প্রশ্নগুলো আবার পড়বে
+            </h2>
+          </div>
+
+          <span className="badge">
+            {book.mistakes.length} saved
+          </span>
+
+        </div>
+
+        {book.mistakes.length ? (
+
+          <div className="progress-list">
+
+            {book.mistakes.map(item=>(
+              <div
+                className="progress-item"
+                key={`mistake-${item.id}`}
+              >
+
+                <div>
+
+                  <div className="item-meta">
+                    <span>
+                      {item.type||'QUESTION'}
+                    </span>
+
+                    <span>
+                      {item.year||'—'}
+                    </span>
+
+                    <span>
+                      {item.concept||'Physics'}
+                    </span>
+                  </div>
+
+                  <h3>{item.q}</h3>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={()=>
+                    removeMistake(item.id)
+                  }
+                >
+                  Remove
+                </button>
+
+              </div>
+            ))}
+
+          </div>
+
+        ) : (
+
+          <div className="note-box">
+            Mistake Book এখনো খালি।
+            Practice থেকে প্রশ্ন যোগ করো।
+          </div>
+
+        )}
+
+      </section>
+
+    </div>
+  );
+}
+
+function ExamMode({chapters,allQuestions}){
+ const [started,setStarted]=useState(false);
+ const [submitted,setSubmitted]=useState(false);
+ const [size,setSize]=useState(20);
+ const [scope,setScope]=useState('all');
+ const [timeLimit,setTimeLimit]=useState(20);
+ const [examQuestions,setExamQuestions]=useState([]);
+ const [current,setCurrent]=useState(0);
+ const [answers,setAnswers]=useState({});
+ const [seconds,setSeconds]=useState(0);
+
+ const buildExam=()=>{
+   let pool=allQuestions.filter(q=>{
+     const c=q.chapterId||q.chapter;
+     return scope==='all'||c===scope;
+   }).filter(q=>String(q.type||'').toUpperCase()==='MCQ');
+
+   pool=[...pool].sort(()=>Math.random()-0.5).slice(0,Number(size));
+
+   if(!pool.length){
+     alert('এই filter অনুযায়ী MCQ পাওয়া যায়নি।');
+     return;
+   }
+
+   setExamQuestions(pool);
+   setAnswers({});
+   setCurrent(0);
+   setSubmitted(false);
+   setSeconds(Number(timeLimit)*60);
+   setStarted(true);
+ };
+
+ const choose=(value)=>{
+   if(submitted)return;
+   const q=examQuestions[current];
+   setAnswers({...answers,[q.id]:value});
+ };
+
+ const submit=()=>{
+   setSubmitted(true);
+ };
+
+ React.useEffect(()=>{
+   if(!started||submitted||seconds<=0)return;
+   const timer=setInterval(()=>setSeconds(x=>x-1),1000);
+   return()=>clearInterval(timer);
+ },[started,submitted,seconds]);
+
+ React.useEffect(()=>{
+   if(started&&!submitted&&seconds===0){
+     setSubmitted(true);
+   }
+ },[seconds,started,submitted]);
+
+ if(!started){
+   return (
+    <div className="exam-page">
+     <section className="exam-hero">
+      <div>
+       <span className="kicker">EXAM MODE • MOCK TEST</span>
+       <h2>নিজের পরীক্ষা নাও</h2>
+       <p>Random MCQ দিয়ে timed test তৈরি করো এবং শেষে performance দেখো।</p>
+      </div>
+      <div className="exam-icon">⌁</div>
+     </section>
+
+     <section className="exam-setup">
+      <h3>Test Setup</h3>
+
+      <div className="exam-options">
+       <label>
+        <span>Chapter</span>
+        <select value={scope} onChange={e=>setScope(e.target.value)}>
+         <option value="all">সব Chapter</option>
+         {chapters.map(c=>
+          <option key={c.id} value={c.id}>
+           Chapter {c.no} — {c.title}
+          </option>
+         )}
+        </select>
+       </label>
+
+       <label>
+        <span>Questions</span>
+        <select value={size} onChange={e=>setSize(e.target.value)}>
+         <option value="10">10 Questions</option>
+         <option value="20">20 Questions</option>
+         <option value="30">30 Questions</option>
+         <option value="50">50 Questions</option>
+        </select>
+       </label>
+
+       <label>
+        <span>Time</span>
+        <select value={timeLimit} onChange={e=>setTimeLimit(e.target.value)}>
+         <option value="10">10 Minutes</option>
+         <option value="20">20 Minutes</option>
+         <option value="30">30 Minutes</option>
+         <option value="60">60 Minutes</option>
+        </select>
+       </label>
+      </div>
+
+      <button className="exam-start" onClick={buildExam}>
+       Start Exam →
+      </button>
+     </section>
+
+     <section className="exam-rules">
+      <div><b>01</b><span>প্রতিটি প্রশ্নের একটি answer select করো</span></div>
+      <div><b>02</b><span>সময় শেষ হলে test automatically submit হবে</span></div>
+      <div><b>03</b><span>Submit-এর পরে score ও ভুল প্রশ্ন দেখা যাবে</span></div>
+     </section>
+    </div>
+   )
+ }
+
+ const correct=examQuestions.filter(q=>{
+   const answer=answers[q.id];
+   const expected=String(q.answer||'').trim().toLowerCase();
+   const selected=String(answer||'').trim().toLowerCase();
+   return expected&&selected&&(
+     selected===expected ||
+     selected.startsWith(expected+')') ||
+     expected.startsWith(selected+')')
+   );
+ }).length;
+
+ const answered=Object.keys(answers).length;
+ const score=correct;
+ const percentage=examQuestions.length
+   ? Math.round(correct/examQuestions.length*100)
+   : 0;
+
+ if(submitted){
+   return (
+    <div className="exam-page">
+     <section className="result-card">
+      <span className="kicker">TEST COMPLETE</span>
+      <h2>পরীক্ষা শেষ</h2>
+
+      <div className="score-circle">
+       <b>{percentage}%</b>
+       <span>Score</span>
+      </div>
+
+      <div className="result-grid">
+       <div><b>{score}</b><span>Correct</span></div>
+       <div><b>{examQuestions.length-score}</b><span>Wrong</span></div>
+       <div><b>{examQuestions.length-answered}</b><span>Unanswered</span></div>
+       <div><b>{examQuestions.length}</b><span>Total</span></div>
+      </div>
+
+      <div className="result-actions">
+       <button onClick={()=>setStarted(false)}>New Test</button>
+       <button onClick={()=>{setSubmitted(false);setCurrent(0)}}>Review Answers</button>
+      </div>
+     </section>
+
+     <section className="review-list">
+      <h3>Question Review</h3>
+
+      {examQuestions.map((q,i)=>{
+       const selected=answers[q.id];
+       const expected=q.answer;
+       const isCorrect=String(selected||'').trim().toLowerCase()===
+                        String(expected||'').trim().toLowerCase();
+
+       return (
+        <article className={`review-item ${isCorrect?'review-correct':'review-wrong'}`} key={q.id}>
+         <div className="review-number">Q{i+1}</div>
+         <div className="review-body">
+          <b>{q.q}</b>
+          <p>Your answer: {selected||'Not answered'}</p>
+          <p>Correct answer: {expected||'Source answer unavailable'}</p>
+         </div>
+         <strong>{isCorrect?'✓':'✕'}</strong>
+        </article>
+       )
+      })}
+     </section>
+    </div>
+   )
+ }
+
+ const q=examQuestions[current];
+ const options=q.options||[];
+
+ const mins=Math.floor(seconds/60).toString().padStart(2,'0');
+ const secs=(seconds%60).toString().padStart(2,'0');
+ const progress=Math.round(((current+1)/examQuestions.length)*100);
+
+ return (
+  <div className="exam-page">
+   <section className="exam-running-head">
+    <div>
+     <span>QUESTION {current+1} / {examQuestions.length}</span>
+     <div className="exam-progress">
+      <div style={{width:`${progress}%`}}></div>
+     </div>
+    </div>
+
+    <div className={`exam-timer ${seconds<=60?'timer-danger':''}`}>
+     ⏱ {mins}:{secs}
+    </div>
+   </section>
+
+   <section className="exam-question">
+    <div className="exam-q-meta">
+     <span>{q.year||'Practice'}</span>
+     <span>{q.concept||'Physics'}</span>
+    </div>
+
+    <h2>{q.q}</h2>
+
+    <div className="exam-options-list">
+     {options.map((option,i)=>{
+       const letter=String.fromCharCode(0x0995+i);
+       const selected=answers[q.id]===option;
+
+       return (
+        <button
+         key={i}
+         className={selected?'exam-option selected':'exam-option'}
+         onClick={()=>choose(option)}
+        >
+         <span>{letter})</span>
+         <b>{option}</b>
+        </button>
+       )
+     })}
+    </div>
+   </section>
+
+   <section className="exam-navigation">
+    <button
+     disabled={current===0}
+     onClick={()=>setCurrent(Math.max(0,current-1))}
+    >
+     ← Previous
+    </button>
+
+    {current<examQuestions.length-1 ? (
+     <button
+      className="exam-next"
+      onClick={()=>setCurrent(current+1)}
+     >
+      Next →
+     </button>
+    ):(
+     <button className="exam-submit" onClick={submit}>
+      Submit Test
+     </button>
+    )}
+   </section>
+
+   <div className="exam-answer-status">
+    Answered {answered} / {examQuestions.length}
+   </div>
+  </div>
+ )
+}
+
+
+createRoot(document.getElementById('root')).render(<App/>);

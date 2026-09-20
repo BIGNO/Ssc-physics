@@ -1,0 +1,206 @@
+import React from "react";
+
+function getType(c = {}) {
+  const t = [
+    c.title, c.definition, c.simpleExplanation,
+    c.detailedExplanation, c.formula, c.examFocus
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  if (/পরিমাপ|ভৌত রাশি|একক|মাত্রা|ত্রুটি|measurement|unit/.test(t)) return "measurement";
+  if (/গতি|বেগ|ত্বরণ|দূরত্ব.*সময়|velocity|acceleration|motion/.test(t)) return "motion";
+  if (/তরঙ্গ|কম্পন|তরঙ্গদৈর্ঘ্য|frequency|wave/.test(t)) return "wave";
+  if (/বল|ঘর্ষণ|নিউটনের|force|friction|newton/.test(t)) return "force";
+  if (/কাজ|শক্তি|ক্ষমতা|kinetic|potential|energy|power/.test(t)) return "energy";
+  if (/ঘনত্ব|density|ভর.*আয়তন|mass.*volume/.test(t)) return "density";
+  if (/চাপ|pressure/.test(t)) return "pressure";
+  if (/দর্পণ|প্রতিফলন|mirror|reflection/.test(t)) return "reflection";
+  if (/লেন্স|প্রতিসরণ|lens|refraction/.test(t)) return "refraction";
+  if (/বিদ্যুৎ|বর্তনী|রোধ|ওহম|current|voltage|resistance|circuit|ohm/.test(t)) return "circuit";
+  if (/চৌম্বক|magnetic|magnet/.test(t)) return "magnetism";
+  if (/মোটর|motor/.test(t)) return "motor";
+  if (/জেনারেটর|generator/.test(t)) return "generator";
+  if (/ট্রান্সফরমার|transformer/.test(t)) return "transformer";
+  if (/তাপ|তাপমাত্রা|heat|temperature/.test(t)) return "heat";
+  if (/পরমাণু|নিউক্লিয়াস|electron|atom|nucleus/.test(t)) return "atom";
+
+  return "science";
+}
+
+function Visual({type}) {
+  switch(type) {
+    case "measurement":
+      return <svg viewBox="0 0 320 180">
+        <line x1="35" y1="120" x2="285" y2="120" className="tm-axis"/>
+        {[0,1,2,3,4,5,6,7,8].map(i =>
+          <line key={i} x1={50+i*28} y1="120" x2={50+i*28} y2={i%2?108:95} className="tm-tick"/>
+        )}
+        <rect x="112" y="55" width="95" height="38" rx="8" className="tm-box tm-float"/>
+        <text x="160" y="79" className="tm-text">reading</text>
+        <text x="160" y="155" className="tm-small">least count</text>
+      </svg>;
+
+    case "motion":
+      return <svg viewBox="0 0 320 180">
+        <line x1="35" y1="135" x2="285" y2="135" className="tm-axis"/>
+        <circle cx="65" cy="112" r="12" className="tm-ball tm-travel"/>
+        <line x1="82" y1="112" x2="230" y2="112" className="tm-arrow"/>
+        <text x="246" y="105" className="tm-small">v</text>
+        <text x="80" y="158" className="tm-small">motion</text>
+      </svg>;
+
+    case "wave":
+      return <svg viewBox="0 0 320 180">
+        <path d="M15 90 C40 35 65 145 90 90 S140 35 165 90 S215 145 240 90 S290 35 320 90"
+              className="tm-wave"/>
+        <line x1="82" y1="145" x2="238" y2="145" className="tm-arrow"/>
+        <text x="160" y="168" className="tm-small">λ</text>
+      </svg>;
+
+    case "force":
+      return <svg viewBox="0 0 320 180">
+        <rect x="120" y="65" width="80" height="52" rx="9" className="tm-box"/>
+        <text x="160" y="97" className="tm-text">m</text>
+        <line x1="160" y1="63" x2="160" y2="28" className="tm-arrow tm-force"/>
+        <line x1="118" y1="91" x2="60" y2="91" className="tm-arrow"/>
+        <text x="173" y="39" className="tm-small">F</text>
+        <text x="58" y="74" className="tm-small">friction</text>
+      </svg>;
+
+    case "energy":
+      return <svg viewBox="0 0 320 180">
+        <rect x="40" y="60" width="72" height="58" rx="9" className="tm-box"/>
+        <rect x="208" y="60" width="72" height="58" rx="9" className="tm-box"/>
+        <text x="76" y="95" className="tm-text">PE</text>
+        <text x="244" y="95" className="tm-text">KE</text>
+        <line x1="118" y1="89" x2="202" y2="89" className="tm-arrow tm-energy"/>
+        <text x="160" y="48" className="tm-small">conversion</text>
+      </svg>;
+
+    case "density":
+      return <svg viewBox="0 0 320 180">
+        <rect x="75" y="50" width="58" height="76" rx="7" className="tm-box"/>
+        <circle cx="225" cy="88" r="36" className="tm-liquid"/>
+        <text x="104" y="94" className="tm-text">m</text>
+        <text x="225" y="94" className="tm-text">V</text>
+        <text x="160" y="154" className="tm-small">ρ = m / V</text>
+      </svg>;
+
+    case "pressure":
+      return <svg viewBox="0 0 320 180">
+        <rect x="105" y="62" width="110" height="25" rx="5" className="tm-box tm-piston"/>
+        <line x1="160" y1="40" x2="160" y2="60" className="tm-arrow"/>
+        <path d="M120 95 Q160 130 200 95" className="tm-pressure-curve"/>
+        <text x="160" y="150" className="tm-small">P = F / A</text>
+      </svg>;
+
+    case "reflection":
+      return <svg viewBox="0 0 320 180">
+        <line x1="215" y1="25" x2="215" y2="155" className="tm-mirror"/>
+        <line x1="35" y1="125" x2="210" y2="85" className="tm-ray"/>
+        <line x1="210" y1="85" x2="290" y2="48" className="tm-ray"/>
+        <line x1="170" y1="85" x2="270" y2="85" className="tm-normal"/>
+        <text x="254" y="108" className="tm-small">i = r</text>
+      </svg>;
+
+    case "refraction":
+      return <svg viewBox="0 0 320 180">
+        <line x1="160" y1="20" x2="160" y2="160" className="tm-normal"/>
+        <line x1="28" y1="42" x2="160" y2="84" className="tm-ray"/>
+        <line x1="160" y1="84" x2="286" y2="137" className="tm-ray tm-refract"/>
+        <line x1="25" y1="84" x2="295" y2="84" className="tm-surface"/>
+        <text x="74" y="72" className="tm-small">medium 1</text>
+        <text x="242" y="72" className="tm-small">medium 2</text>
+      </svg>;
+
+    case "circuit":
+      return <svg viewBox="0 0 320 180">
+        <path d="M55 45 H265 V135 H55 Z" className="tm-wire"/>
+        <circle cx="55" cy="90" r="24" className="tm-source"/>
+        <rect x="132" y="34" width="50" height="22" rx="4" className="tm-resistor"/>
+        <circle cx="235" cy="45" r="6" className="tm-electron e1"/>
+        <circle cx="205" cy="45" r="5" className="tm-electron e2"/>
+        <circle cx="175" cy="45" r="4" className="tm-electron e3"/>
+        <text x="55" y="96" className="tm-text">V</text>
+        <text x="157" y="50" className="tm-small">R</text>
+      </svg>;
+
+    case "magnetism":
+      return <svg viewBox="0 0 320 180">
+        <path d="M65 90 C70 28 250 28 255 90" className="tm-field"/>
+        <path d="M65 90 C70 152 250 152 255 90" className="tm-field"/>
+        <rect x="105" y="73" width="110" height="34" rx="7" className="tm-box"/>
+        <text x="125" y="95" className="tm-small">N</text>
+        <text x="195" y="95" className="tm-small">S</text>
+      </svg>;
+
+    case "motor":
+    case "generator":
+      return <svg viewBox="0 0 320 180">
+        <circle cx="160" cy="82" r="45" className="tm-coil"/>
+        <line x1="115" y1="82" x2="70" y2="82" className="tm-wire"/>
+        <line x1="205" y1="82" x2="250" y2="82" className="tm-wire"/>
+        <line x1="160" y1="37" x2="160" y2="127" className="tm-spin"/>
+        <text x="160" y="153" className="tm-small">
+          {type === "motor" ? "electricity → motion" : "motion → electricity"}
+        </text>
+      </svg>;
+
+    case "transformer":
+      return <svg viewBox="0 0 320 180">
+        <line x1="130" y1="35" x2="130" y2="145" className="tm-core"/>
+        <line x1="190" y1="35" x2="190" y2="145" className="tm-core"/>
+        <path d="M105 45 C75 65 75 115 105 135" className="tm-coil"/>
+        <path d="M215 45 C245 65 245 115 215 135" className="tm-coil"/>
+        <text x="88" y="155" className="tm-small">Vp</text>
+        <text x="232" y="155" className="tm-small">Vs</text>
+      </svg>;
+
+    case "heat":
+      return <svg viewBox="0 0 320 180">
+        <rect x="105" y="52" width="110" height="72" rx="9" className="tm-box"/>
+        <circle cx="128" cy="73" r="5" className="tm-hot h1"/>
+        <circle cx="157" cy="103" r="6" className="tm-hot h2"/>
+        <circle cx="184" cy="75" r="5" className="tm-hot h3"/>
+        <circle cx="201" cy="104" r="5" className="tm-hot h4"/>
+        <text x="160" y="153" className="tm-small">Q = mcΔT</text>
+      </svg>;
+
+    case "atom":
+      return <svg viewBox="0 0 320 180">
+        <ellipse cx="160" cy="90" rx="88" ry="34" className="tm-orbit"/>
+        <ellipse cx="160" cy="90" rx="34" ry="88" className="tm-orbit"/>
+        <circle cx="160" cy="90" r="19" className="tm-nucleus"/>
+        <circle cx="248" cy="90" r="6" className="tm-electron atom-e"/>
+      </svg>;
+
+    default:
+      return <svg viewBox="0 0 320 180">
+        <circle cx="160" cy="90" r="32" className="tm-pulse"/>
+        <circle cx="160" cy="90" r="55" className="tm-ring"/>
+        <circle cx="160" cy="90" r="78" className="tm-ring ring2"/>
+        <text x="160" y="95" className="tm-text">PHYSICS</text>
+      </svg>;
+  }
+}
+
+export default function TopicMicroDemo({concept}) {
+  const type = getType(concept);
+
+  return (
+    <aside className="topic-micro-demo">
+      <div className="tm-head">
+        <span>VISUAL DEMO</span>
+        <b>3.8s LOOP</b>
+      </div>
+
+      <div className="tm-stage">
+        <Visual type={type}/>
+      </div>
+
+      <div className="tm-foot">
+        <span>{concept?.title || "Physics concept"}</span>
+        <small>Hover to pause</small>
+      </div>
+    </aside>
+  );
+}

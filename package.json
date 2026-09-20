@@ -12,12 +12,9 @@
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "concurrently": "latest",
-    "dotenv": "latest",
     "express": "latest",
-    "openai": "latest",
     "react": "latest",
     "react-dom": "latest",
     "vite": "latest"
-  },
-  "devDependencies": {}
+  }
 }

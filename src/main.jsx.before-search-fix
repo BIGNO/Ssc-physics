@@ -329,21 +329,10 @@ function App(){
      )
    );
 
- const normalizedPdfQuestions = pdfQuestions.map((q,index) => ({
-  ...q,
-  chapter: q.chapter || q.chapterId || "",
-  id: q.id || `pdf-${index+1}`,
-  type: q.type || "MCQ",
-  source: q.source || "SSC Super Suggestions 2025 PDF",
-  concept: q.concept || "PDF Question Bank",
-  solution: q.solution || "",
-  verified: Boolean(q.verified)
-}));
-
-const allQuestions = [
+ const allQuestions = [
    ...questions,
    ...subject.chapters.flatMap(c => c.questions || []),
-   ...normalizedPdfQuestions,
+   ...pdfQuestions,
    ...hyrlQuestions
  ];
 
@@ -405,26 +394,18 @@ const allQuestions = [
  const toggleDone=()=>update({progress:{...state.progress,[chapter.id]:!state.progress[chapter.id]}});
  const completion=Math.round(Object.values(state.progress).filter(Boolean).length/subject.chapters.length*100);
  return <div className="app">
-   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search">
-        <span>⌕</span>
-        <input
-          value={search}
-          onChange={e=>setSearch(e.target.value)}
-          placeholder="Chapter / concept খুঁজুন..."
-        />
+   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search"><span>⌕</span><input value={search} onChange={e=>
         {search && (
           <button
             type="button"
             className="search-clear-btn"
-            onClick={()=>setSearch("")}
+            onClick={()=>setSearch('')}
             title="Clear search"
             aria-label="Clear search"
           >
             ×
           </button>
-        )}
-      </div>
-      <button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
+        )}setSearch(e.target.value)} placeholder="Chapter / concept খুঁজুন..."/></div><button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
    
    <Whiteboard
      chapter={chapter}

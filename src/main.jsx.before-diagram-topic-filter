@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import Whiteboard from './components/Whiteboard.jsx';
-import TopicMicroDemo from './components/TopicMicroDemo.jsx';
 import PerTopicPhysicsDiagrams from './components/PerTopicPhysicsDiagrams.jsx';
 import PhysicsDiagramBoard from './components/PhysicsDiagramBoard.jsx';
+import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import pdfQuestions from './data/pdfQuestions.json';
-import hyrlQuestionSource from './HYRL_Class9_Physics_MCQ_CQ.json';
 import {subjects, questions, sourcesNote} from './data/content';
 import {chapter1} from './data/chapter1';
 import {chapter2} from './data/chapter2';
@@ -28,286 +25,6 @@ const defaults={progress:{},notes:{},diagrams:{}};
 const load=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(storeKey)||'{}')}}catch{return defaults}};
 const save=s=>localStorage.setItem(storeKey,JSON.stringify(s));
 
-
-function normalizeChapterText(text="") {
-  return String(text)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu,"");
-}
-
-function levenshteinRatio(a,b) {
-  a = normalizeChapterText(a);
-  b = normalizeChapterText(b);
-
-  if (!a && !b) return 1;
-  if (!a || !b) return 0;
-
-  const A = Array.from(a);
-  const B = Array.from(b);
-
-  const prev = Array(B.length + 1).fill(0);
-
-  for(let j=0;j<=B.length;j++) {
-    prev[j] = j;
-  }
-
-  for(let i=1;i<=A.length;i++) {
-    const cur = [i];
-
-    for(let j=1;j<=B.length;j++) {
-      const cost = A[i-1] === B[j-1] ? 0 : 1;
-
-      cur[j] = Math.min(
-        cur[j-1] + 1,
-        prev[j] + 1,
-        prev[j-1] + cost
-      );
-    }
-
-    for(let j=0;j<cur.length;j++) {
-      prev[j] = cur[j];
-    }
-  }
-
-  const distance = prev[B.length];
-  const maxLen = Math.max(A.length,B.length);
-
-  return maxLen ? 1 - distance/maxLen : 1;
-}
-
-function mapHyrlChapter(item, chapterList) {
-
-  /*
-   * HYRL PDF chapter order is preserved.
-   * The source contains 12 chapter sections.
-   *
-   * p1  → ভৌত রাশি এবং পরিমাপ
-   * p2  → গতি
-   * p3  → বল
-   * p4  → কাজ, ক্ষমতা ও শক্তি
-   * p5  → পদার্থের অবস্থা ও চাপ
-   * p6  → বস্তুর ওপর তাপের প্রভাব
-   * p7  → তরঙ্গ ও শব্দ
-   * p8  → আলোর প্রতিফলন
-   * p9  → আলোর প্রতিসরণ
-   * p10 → স্থির বিদ্যুৎ
-   * p11 → চল বিদ্যুৎ
-   * p12 → বিদ্যুতের চৌম্বক ক্রিয়া
-   *
-   * The PDF OCR contains character corruption, so
-   * deterministic mapping is safer than fuzzy matching.
-   */
-
-  const source = String(item?.chapterSource || "");
-
-  const chapterMap = [
-    {
-      keys: [
-        "ভ ৌত রাশি",
-        "ভৌত রাশি",
-        "পশরমাপ",
-        "পরিমাপ"
-      ],
-      id: "p1"
-    },
-
-    {
-      keys: [
-        "গশত",
-        "গতি"
-      ],
-      id: "p2"
-    },
-
-    {
-      keys: [
-        "বল"
-      ],
-      id: "p3"
-    },
-
-    {
-      keys: [
-        "কাজ, ক্ষমতা",
-        "কাজ, ক্ষমতা ও িশি",
-        "ক্ষমতা ও"
-      ],
-      id: "p4"
-    },
-
-    {
-      keys: [
-        "পদার্থের অবস্থা",
-        "অবস্থা ও চাপ"
-      ],
-      id: "p5"
-    },
-
-    {
-      keys: [
-        "বস্তুর ওপর",
-        "তার্পর প্র াব"
-      ],
-      id: "p6"
-    },
-
-    {
-      keys: [
-        "তরঙ্গ",
-        "িব্দ",
-        "শব্দ"
-      ],
-      id: "p7"
-    },
-
-    {
-      keys: [
-        "আর্লার প্রশতফলন",
-        "আলোর প্রতিফলন"
-      ],
-      id: "p8"
-    },
-
-    {
-      keys: [
-        "আর্লার প্রশতসরণ",
-        "আলোর প্রতিসরণ"
-      ],
-      id: "p9"
-    },
-
-    {
-      keys: [
-        "শস্থর শবদযুৎ",
-        "স্থির বিদ্যুৎ"
-      ],
-      id: "p10"
-    },
-
-    {
-      keys: [
-        "ঢল শবদযুৎ",
-        "চল বিদ্যুৎ"
-      ],
-      id: "p11"
-    },
-
-    {
-      keys: [
-        "শবদযুর্তর ভচৌম্বক",
-        "বিদ্যুতের চৌম্বক",
-        "চৌম্বক শিয়া"
-      ],
-      id: "p12"
-    }
-  ];
-
-  const normalized = source
-    .replace(/\s+/g," ")
-    .trim()
-    .toLowerCase();
-
-  const matched = chapterMap.find(entry =>
-    entry.keys.some(key =>
-      normalized.includes(
-        key.toLowerCase()
-      )
-    )
-  );
-
-  if (matched) {
-    const chapter =
-      chapterList.find(
-        c => c.id === matched.id
-      ) || null;
-
-    return {
-      chapter,
-      score: chapter ? 1 : 0
-    };
-  }
-
-  /*
-   * Keep unmatched instead of guessing.
-   */
-  return {
-    chapter: null,
-    score: 0
-  };
-}
-
-function normalizeHyrlQuestion(item, chapterList, index) {
-  const mapped = mapHyrlChapter(item,chapterList);
-
-  return {
-    id: item.id || `hyrl-${index+1}`,
-
-    /*
-     * Existing Practice Zone expects q.chapter.
-     */
-    chapter: mapped.chapter?.id || "unmapped-suggestion",
-
-    chapterTitle: mapped.chapter?.title || item.chapterSource || "",
-
-    /*
-     * Original source remains identifiable.
-     */
-    source: "HYRL Suggestion",
-
-    sourceFile: item.source || "",
-
-    sourceType: "Suggestion / preparation material",
-
-    page: item.page ?? null,
-
-    year: item.year ?? null,
-
-    type: item.type || "",
-
-    difficulty:
-      item.difficulty === null ||
-      item.difficulty === undefined
-        ? null
-        : item.difficulty,
-
-    importance:
-      item.importance === null ||
-      item.importance === undefined
-        ? null
-        : item.importance,
-
-    /*
-     * Do not invent a concept when source has none.
-     */
-    concept: item.concept || "",
-
-    /*
-     * Existing QuestionCard uses q.q.
-     */
-    q: item.question || "",
-
-    options: Array.isArray(item.options)
-      ? item.options
-      : [],
-
-    answer: item.answer || "",
-
-    solution: item.solution || "",
-
-    stimulus: item.stimulus || "",
-
-    verified: Boolean(item.verified),
-
-    chapterMappingScore: Number(
-      mapped.score.toFixed(3)
-    ),
-
-    sourceNote:
-      item.sourceNote ||
-      "Suggestion material; not treated as verified Board-year data."
-  };
-}
-
 function App(){
  const subject={
    ...subjects[0],
@@ -320,119 +37,21 @@ function App(){
    )
  };
 
- const hyrlQuestions = (hyrlQuestionSource.questions || [])
-   .map((item,index) =>
-     normalizeHyrlQuestion(
-       item,
-       subject.chapters,
-       index
-     )
-   );
-
- const normalizedPdfQuestions = pdfQuestions.map((q,index) => ({
-  ...q,
-  chapter: q.chapter || q.chapterId || "",
-  id: q.id || `pdf-${index+1}`,
-  type: q.type || "MCQ",
-  source: q.source || "SSC Super Suggestions 2025 PDF",
-  concept: q.concept || "PDF Question Bank",
-  solution: q.solution || "",
-  verified: Boolean(q.verified)
-}));
-
-const allQuestions = [
+ const allQuestions = [
    ...questions,
    ...subject.chapters.flatMap(c => c.questions || []),
-   ...normalizedPdfQuestions,
-   ...hyrlQuestions
+   ...pdfQuestions
  ];
 
- console.log(
-   "HYRL Question Bank:",
-   hyrlQuestions.length,
-   "items"
- );
-
- console.log(
-   "HYRL MCQ:",
-   hyrlQuestions.filter(q=>q.type==="MCQ").length,
-   "CQ:",
-   hyrlQuestions.filter(q=>q.type==="CQ").length
- );
-
- console.log(
-   "HYRL mapped:",
-   hyrlQuestions.filter(
-     q=>q.chapter!=="unmapped-suggestion"
-   ).length,
-   "unmapped:",
-   hyrlQuestions.filter(
-     q=>q.chapter==="unmapped-suggestion"
-   ).length
- );
-
- console.log(
-   "TOTAL QUESTIONS:",
-   allQuestions.length
- );
-
- const [state,setState]=useState(load);
- const [whiteboardOpen,setWhiteboardOpen]=useState(false); const [chapterId,setChapterId]=useState('p1'); const [tab,setTab]=useState('dashboard'); const [search,setSearch]=useState('');
+ const [state,setState]=useState(load); const [chapterId,setChapterId]=useState('p1'); const [tab,setTab]=useState('dashboard'); const [search,setSearch]=useState('');
  const chapter=subject.chapters.find(x=>x.id===chapterId)||subject.chapters[0];
- const chapters = subject.chapters.filter(c => {
-   const q = search.trim().toLowerCase();
-
-   if (!q) return true;
-
-   const chapterText = [
-     c.no,
-     c.title,
-     c.focus,
-     ...(c.manual || []),
-     ...((c.concepts || []).flatMap(x => [
-       x.title,
-       x.definition,
-       x.simpleExplanation,
-       x.detailedExplanation,
-       x.formula,
-       x.examFocus
-     ].filter(Boolean)))
-   ].join(" ").toLowerCase();
-
-   return chapterText.includes(q);
- });
+ const chapters=subject.chapters.filter(c=>(`${c.no} ${c.title} ${c.focus}`).toLowerCase().includes(search.toLowerCase()));
  const update=(partial)=>{const n={...state,...partial};setState(n);save(n)};
  const toggleDone=()=>update({progress:{...state.progress,[chapter.id]:!state.progress[chapter.id]}});
  const completion=Math.round(Object.values(state.progress).filter(Boolean).length/subject.chapters.length*100);
  return <div className="app">
-   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search">
-        <span>⌕</span>
-        <input
-          value={search}
-          onChange={e=>setSearch(e.target.value)}
-          placeholder="Chapter / concept খুঁজুন..."
-        />
-        {search && (
-          <button
-            type="button"
-            className="search-clear-btn"
-            onClick={()=>setSearch("")}
-            title="Clear search"
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-        )}
-      </div>
-      <button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
-   
-   <Whiteboard
-     chapter={chapter}
-     open={whiteboardOpen}
-     setOpen={setWhiteboardOpen}
-   />
-
-<div className="layout"><aside className="sidebar"><div className="side-label">SUBJECT</div><div className="subject-card active"><span className="subject-icon">⚛</span><div><b>পদার্থবিজ্ঞান</b><small>নবম–দশম</small></div><strong>{subject.chapters.length}</strong></div><div className="side-label">CHAPTERS</div><div className="chapter-list">{chapters.map(c=><button key={c.id} className={`chapter ${c.id===chapter.id?'active':''}`} onClick={()=>{setChapterId(c.id);setTab('learn')}}><span className="num">{String(c.no).padStart(2,'0')}</span><span><b>{c.title}</b><small>{c.focus}</small></span>{state.progress[c.id]&&<i>✓</i>}</button>)}</div><div className="sidebar-foot"><span className="live-dot"/> Physics Lab ready</div></aside>
+   <header className="topbar"><div className="brand"><div className="logo">∿</div><div><b>Physics 9–10</b><span>Interactive Learning Hub 2.0</span></div></div><div className="header-right"><div className="progress-chip">Progress <b>{completion}%</b></div><div className="search"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Chapter / concept খুঁজুন..."/></div><button className="dark-btn" onClick={()=>setTab('practice')}>Practice Zone</button></div></header>
+   <div className="layout"><aside className="sidebar"><div className="side-label">SUBJECT</div><div className="subject-card active"><span className="subject-icon">⚛</span><div><b>পদার্থবিজ্ঞান</b><small>নবম–দশম</small></div><strong>{subject.chapters.length}</strong></div><div className="side-label">CHAPTERS</div><div className="chapter-list">{chapters.map(c=><button key={c.id} className={`chapter ${c.id===chapter.id?'active':''}`} onClick={()=>{setChapterId(c.id);setTab('learn')}}><span className="num">{String(c.no).padStart(2,'0')}</span><span><b>{c.title}</b><small>{c.focus}</small></span>{state.progress[c.id]&&<i>✓</i>}</button>)}</div><div className="sidebar-foot"><span className="live-dot"/> AI Tutor ready</div></aside>
    <main className="main"><section className="hero"><div><div className="eyebrow">CHAPTER {chapter.no} • STUDENT ROADMAP</div><h1>{chapter.title}</h1><p>{chapter.focus}</p></div><button className={state.progress[chapter.id]?'done-btn':'primary-btn'} onClick={toggleDone}>{state.progress[chapter.id]?'✓ Learned':'Mark as learned'}</button></section>
     <nav className="tabs"><button className={tab==='learn'?'active':''} onClick={()=>setTab('learn')}>Learn</button><button className={tab==='diagram'?'active':''} onClick={()=>setTab('diagram')}>Diagram Board</button><button className={tab==='practice'?'active':''} onClick={()=>setTab('practice')}>Practice</button><button className={tab==='exam'?'active':''} onClick={()=>setTab('exam')}>Exam Mode</button></nav>
     {tab==='dashboard'&&
@@ -678,211 +297,163 @@ function diagramDefaults(type){
 }
 
 function detectDiagramModel(chapter, concept) {
-  const text = `${concept?.title || ""} ${concept?.focus || ""}`.toLowerCase();
-
-  /*
-   * IMPORTANT:
-   * Return a model ONLY when this concept genuinely needs
-   * a diagram/model. Otherwise return null.
-   *
-   * This prevents one generic diagram from appearing for
-   * every topic in a chapter.
-   */
+  const text = `${chapter.title} ${chapter.focus} ${concept?.title || ""}`.toLowerCase();
 
   if (
     text.includes("পরিমাপ") ||
-    text.includes("স্কেল") ||
-    text.includes("মিটার") ||
-    text.includes("ভার্নিয়ার") ||
-    text.includes("screw gauge") ||
-    text.includes("vernier") ||
+    text.includes("ভৌত রাশি") ||
+    text.includes("একক") ||
+    text.includes("মাত্রা") ||
+    text.includes("ruler") ||
     text.includes("measurement")
   ) return "measurement";
 
   if (
-    text.includes("দূরত্ব-সময়") ||
-    text.includes("দূরত্ব সময়") ||
-    text.includes("বেগ-সময়") ||
-    text.includes("বেগ সময়") ||
-    text.includes("গতি-গ্রাফ") ||
-    text.includes("গতি গ্রাফ") ||
-    text.includes("motion graph") ||
+    text.includes("ভরবেগ") ||
+    text.includes("momentum")
+  ) return "momentum";
+
+  if (
+    text.includes("গতি") ||
+    text.includes("দূরত্ব") ||
+    text.includes("সরণ") ||
+    text.includes("বেগ") ||
+    text.includes("ত্বরণ") ||
+    text.includes("speed") ||
+    text.includes("velocity") ||
+    text.includes("acceleration") ||
     text.includes("motion")
   ) return "motion";
 
   if (
-    text.includes("free body") ||
-    text.includes("মুক্ত বস্তুর") ||
-    text.includes("বল-এর") ||
-    text.includes("বল এর") ||
-    text.includes("বল চিত্র") ||
-    text.includes("force diagram") ||
-    text.includes("ঘর্ষণ বল") ||
-    text.includes("friction")
+    text.includes("বল") ||
+    text.includes("নিউটন") ||
+    text.includes("ঘর্ষণ") ||
+    text.includes("inertia") ||
+    text.includes("force")
   ) return "force";
 
   if (
-    text.includes("ভরবেগ") ||
-    text.includes("সংঘর্ষ") ||
-    text.includes("momentum") ||
-    text.includes("collision")
-  ) return "momentum";
-
-  if (
-    text.includes("শক্তির রূপান্তর") ||
-    text.includes("শক্তির সংরক্ষণ") ||
-    text.includes("কাজ-শক্তি") ||
-    text.includes("energy diagram") ||
-    text.includes("work-energy")
+    text.includes("কাজ") ||
+    text.includes("শক্তি") ||
+    text.includes("ক্ষমতা") ||
+    text.includes("power") ||
+    text.includes("energy") ||
+    text.includes("work")
   ) return "energy";
 
   if (
-    text.includes("ঘনত্বের") ||
-    text.includes("density experiment") ||
-    text.includes("density diagram")
+    text.includes("ঘনত্ব") ||
+    text.includes("density")
   ) return "density";
 
   if (
-    text.includes("তরল চাপ") ||
-    text.includes("গভীরতার সাথে চাপ") ||
-    text.includes("চাপের পরিবর্তন") ||
-    text.includes("pressure diagram") ||
-    text.includes("liquid pressure")
+    text.includes("চাপ") ||
+    text.includes("pressure")
   ) return "pressure";
 
   if (
-    text.includes("তরঙ্গের") ||
-    text.includes("তরঙ্গ চিত্র") ||
-    text.includes("তরঙ্গের সমীকরণ") ||
-    text.includes("wave diagram") ||
+    text.includes("তরঙ্গ") ||
     text.includes("wave")
   ) return "wave";
 
   if (
-    text.includes("শব্দ তরঙ্গ") ||
-    text.includes("সংকোচন") ||
-    text.includes("প্রসারণ") ||
-    text.includes("compression") ||
-    text.includes("rarefaction") ||
-    text.includes("sound wave")
+    text.includes("শব্দ") ||
+    text.includes("sound") ||
+    text.includes("কম্পন")
   ) return "sound";
 
   if (
-    text.includes("সমতল দর্পণ") ||
-    text.includes("দর্পণের রশ্মি") ||
-    text.includes("দর্পণের ray") ||
-    text.includes("reflection ray") ||
-    text.includes("reflection")
+    text.includes("প্রতিফলন") ||
+    text.includes("আয়না") ||
+    text.includes("দর্পণ") ||
+    text.includes("reflection") ||
+    text.includes("mirror")
   ) return "reflection";
 
   if (
-    text.includes("প্রতিসরণ চিত্র") ||
-    text.includes("প্রতিসরণের রশ্মি") ||
-    text.includes("refraction ray") ||
-    text.includes("snell") ||
+    text.includes("প্রতিসরণ") ||
+    text.includes("প্রতিসারক") ||
     text.includes("refraction")
   ) return "refraction";
 
   if (
-    text.includes("উত্তল লেন্স") ||
-    text.includes("অবতল লেন্স") ||
-    text.includes("লেন্সের রশ্মি") ||
-    text.includes("lens ray") ||
-    text.includes("lens diagram") ||
+    text.includes("লেন্স") ||
     text.includes("lens")
   ) return "lens";
 
   if (
-    text.includes("তড়িৎ বর্তনী") ||
-    text.includes("তড়িৎ বর্তনী") ||
-    text.includes("বর্তনী চিত্র") ||
-    text.includes("series circuit") ||
-    text.includes("parallel circuit") ||
-    text.includes("circuit diagram")
+    text.includes("বর্তনী") ||
+    text.includes("সার্কিট") ||
+    text.includes("তড়িৎ") ||
+    text.includes("বিদ্যুৎ") ||
+    text.includes("circuit") ||
+    text.includes("resistance")
   ) return "circuit";
 
   if (
-    text.includes("শ্রেণি সমবায়") ||
-    text.includes("শ্রেণি সমায়") ||
-    text.includes("সমান্তরাল সমবায়") ||
-    text.includes("সমান্তরাল সমায়") ||
-    text.includes("series combination") ||
-    text.includes("parallel combination")
+    text.includes("series") ||
+    text.includes("parallel") ||
+    text.includes("সমান্তরাল") ||
+    text.includes("শ্রেণি")
   ) return "series";
 
   if (
-    text.includes("চৌম্বক ক্ষেত্রের রেখা") ||
-    text.includes("চৌম্বক ক্ষেত্র") ||
-    text.includes("magnetic field") ||
-    text.includes("field line") ||
+    text.includes("চৌম্বক") ||
+    text.includes("magnetic") ||
     text.includes("magnet")
   ) return "magnetic";
 
   if (
-    text.includes("বৈদ্যুতিক মোটর") ||
-    text.includes("মোটরের চিত্র") ||
-    text.includes("motor diagram") ||
+    text.includes("মোটর") ||
     text.includes("motor")
   ) return "motor";
 
   if (
-    text.includes("বৈদ্যুতিক জেনারেটর") ||
-    text.includes("জেনারেটরের চিত্র") ||
-    text.includes("generator diagram") ||
+    text.includes("জেনারেটর") ||
     text.includes("generator")
   ) return "generator";
 
   if (
-    text.includes("ট্রান্সফরমারের চিত্র") ||
     text.includes("ট্রান্সফরমার") ||
-    text.includes("transformer diagram") ||
     text.includes("transformer")
   ) return "transformer";
 
   if (
-    text.includes("তাপমাত্রা-সময়") ||
-    text.includes("তাপমাত্রা সময়") ||
-    text.includes("তাপ সঞ্চালন চিত্র") ||
-    text.includes("temperature graph") ||
-    text.includes("heat diagram")
+    text.includes("তাপ") ||
+    text.includes("temperature") ||
+    text.includes("heat") ||
+    text.includes("উষ্ণতা")
   ) return "heat";
 
   if (
-    text.includes("পরমাণুর গঠন") ||
-    text.includes("পরমাণু মডেল") ||
-    text.includes("electron shell") ||
-    text.includes("atomic model") ||
+    text.includes("পরমাণু") ||
+    text.includes("পরমাণুর") ||
     text.includes("atom")
   ) return "atom";
 
   if (
-    text.includes("তেজস্ক্রিয় ক্ষয়") ||
-    text.includes("তেজস্ক্রিয় ক্ষয়") ||
-    text.includes("radioactive decay") ||
-    text.includes("decay curve") ||
+    text.includes("তেজস্ক্রিয়") ||
+    text.includes("radioactive") ||
     text.includes("radioactivity")
   ) return "radioactivity";
 
   if (
-    text.includes("p-n junction") ||
-    text.includes("pn junction") ||
-    text.includes("p-type") ||
-    text.includes("n-type") ||
-    text.includes("অর্ধপরিবাহী সংযোগ") ||
-    text.includes("semiconductor")
+    text.includes("অর্ধপরিবাহী") ||
+    text.includes("semiconductor") ||
+    text.includes("p-n") ||
+    text.includes("pn junction")
   ) return "semiconductor";
 
   if (
+    text.includes("যন্ত্র") ||
     text.includes("লিভার") ||
-    text.includes("পুলি") ||
-    text.includes("simple machine") ||
-    text.includes("যান্ত্রিক সুবিধা") ||
-    text.includes("mechanical advantage") ||
+    text.includes("pulley") ||
     text.includes("lever") ||
-    text.includes("pulley")
+    text.includes("mechanical")
   ) return "machine";
 
-  return null;
+  return "generic";
 }
 
 function defaultDiagramValues(model) {
@@ -935,275 +506,37 @@ function defaultDiagramValues(model) {
   return base;
 }
 
-function diagramExamRules(model) {
-  const rules = {
-    measurement: [
-      "পরিমাপ = scale reading অনুযায়ী নিতে হবে।",
-      "Least count ঠিকভাবে ব্যবহার করো।",
-      "Zero error থাকলে correction apply করো।"
-    ],
-
-    motion: [
-      "Distance–time graph-এর slope = velocity.",
-      "Velocity–time graph-এর slope = acceleration.",
-      "Velocity–time graph-এর area = displacement."
-    ],
-
-    force: [
-      "Net force: F = ma.",
-      "Balanced force হলে net force = 0.",
-      "Friction সবসময় relative motion-এর বিপরীত দিকে কাজ করে।"
-    ],
-
-    momentum: [
-      "Momentum: p = mv.",
-      "Isolated system-এ total momentum conserved.",
-      "Collision question-এ before = after momentum equation লেখো।"
-    ],
-
-    energy: [
-      "Work: W = Fs cosθ.",
-      "Kinetic energy: KE = ½mv².",
-      "Potential energy: PE = mgh."
-    ],
-
-    density: [
-      "Density: ρ = m/V.",
-      "Mass বাড়লে একই volume-এ density বাড়ে।",
-      "SI unit: kg/m³."
-    ],
-
-    pressure: [
-      "Pressure: P = F/A.",
-      "Liquid pressure: P = hρg.",
-      "Depth বাড়লে liquid pressure বাড়ে।"
-    ],
-
-    wave: [
-      "Wave equation: v = fλ.",
-      "Frequency বাড়লে wavelength কমে, একই medium-এ.",
-      "Amplitude বেশি হলে wave বেশি দোলন দেখায়।"
-    ],
-
-    sound: [
-      "Sound wave-এ compression ও rarefaction থাকে।",
-      "f = 1/T.",
-      "v = fλ."
-    ],
-
-    reflection: [
-      "Angle of incidence = angle of reflection.",
-      "i = r.",
-      "Angles সবসময় normal-এর সাথে মাপতে হবে।"
-    ],
-
-    refraction: [
-      "Snell's law: n₁ sin i = n₂ sin r.",
-      "Rarer → denser গেলে ray normal-এর দিকে বাঁকে।",
-      "Denser → rarer গেলে ray normal থেকে দূরে বাঁকে।"
-    ],
-
-    lens: [
-      "Lens formula: 1/f = 1/v − 1/u.",
-      "Magnification: m = v/u.",
-      "Parallel ray → principal focus.",
-      "Optical centre দিয়ে ray গেলে প্রায় undeviated যায়।"
-    ],
-
-    circuit: [
-      "Ohm's law: V = IR.",
-      "Series circuit-এ current একই থাকে।",
-      "Parallel circuit-এ potential difference একই থাকে।"
-    ],
-
-    series: [
-      "Series resistance: R = R₁ + R₂ + ...",
-      "Parallel resistance: 1/R = 1/R₁ + 1/R₂ + ..."
-    ],
-
-    magnetic: [
-      "Field lines বাইরে N → S.",
-      "Lines যত ঘন, field তত strong.",
-      "Field line-এ tangent direction field direction দেয়।"
-    ],
-
-    motor: [
-      "Fleming's Left-Hand Rule → motor.",
-      "Electrical energy → mechanical energy.",
-      "Force direction field ও current-এর উপর নির্ভর করে।"
-    ],
-
-    generator: [
-      "Fleming's Right-Hand Rule → generator.",
-      "Mechanical energy → electrical energy.",
-      "Changing magnetic flux induces emf."
-    ],
-
-    transformer: [
-      "Vs/Vp = Ns/Np.",
-      "Ns > Np → step-up transformer.",
-      "Ns < Np → step-down transformer."
-    ],
-
-    heat: [
-      "Heat equation: Q = mcΔT.",
-      "Temperature difference থাকলে heat transfer হয়।",
-      "Temperature পরিবর্তন graph-এ slope/shape দেখে compare করো।"
-    ],
-
-    atom: [
-      "Electrons shell-এ অবস্থান করে।",
-      "Atomic number = number of protons.",
-      "Neutral atom-এ electrons = protons."
-    ],
-
-    radioactivity: [
-      "Radioactive decay is spontaneous.",
-      "Half-life = অর্ধেক nuclei decay হতে যত সময় লাগে।",
-      "Decay graph সাধারণত exponential nature-এর।"
-    ],
-
-    semiconductor: [
-      "P-type ও N-type material join করলে p-n junction হয়।",
-      "Depletion region junction-এর কাছে থাকে।",
-      "Forward/reverse bias অনুযায়ী current behaviour বদলায়।"
-    ],
-
-    machine: [
-      "Mechanical Advantage: MA = Load/Effort.",
-      "Efficiency = useful output/input × 100%.",
-      "Lever/pulley diagram-এ force direction ও arm identify করো।"
-    ]
-  };
-
-  return rules[model] || [];
-}
-
-function diagramModelLabel(model) {
-  const labels = {
-    measurement:"Measurement",
-    motion:"Motion Graph",
-    force:"Force Diagram",
-    momentum:"Momentum",
-    energy:"Energy",
-    density:"Density",
-    pressure:"Pressure",
-    wave:"Wave",
-    sound:"Sound Wave",
-    reflection:"Reflection",
-    refraction:"Refraction",
-    lens:"Lens Ray Diagram",
-    circuit:"Circuit",
-    series:"Series / Parallel",
-    magnetic:"Magnetic Field",
-    motor:"Electric Motor",
-    generator:"Generator",
-    transformer:"Transformer",
-    heat:"Heat",
-    atom:"Atomic Model",
-    radioactivity:"Radioactive Decay",
-    semiconductor:"P-N Junction",
-    machine:"Simple Machine"
-  };
-
-  return labels[model] || model;
-}
-
 function DiagramBoard({chapter,state,update}) {
+  const concepts = chapter.concepts?.length
+    ? chapter.concepts
+    : [{
+        id: `${chapter.id}-main`,
+        title: chapter.title,
+        focus: chapter.focus
+      }];
 
-  const concepts = chapter.concepts || [];
-
-  /*
-   * ONLY topics that genuinely have a diagram/model
-   * are included here.
-   */
-  const diagramTopics = concepts
-    .map((concept,index)=>({
-      ...concept,
-      _index:index,
-      model:detectDiagramModel(chapter,concept)
-    }))
-    .filter(concept=>Boolean(concept.model));
-
-  const [selectedId,setSelectedId] = useState(
-    diagramTopics[0]?.id || null
-  );
-
-  useEffect(()=>{
-    if (
-      selectedId &&
-      diagramTopics.some(x=>x.id===selectedId)
-    ) return;
-
-    setSelectedId(diagramTopics[0]?.id || null);
-  },[chapter.id]);
+  const [selectedId,setSelectedId] = useState(concepts[0]?.id);
 
   const selected =
-    diagramTopics.find(x=>x.id===selectedId) ||
-    diagramTopics[0] ||
-    null;
+    concepts.find(c => c.id === selectedId) || concepts[0];
 
-  if (!selected) {
-    return (
-      <section className="diagram-page">
-        <div className="panel">
-          <div className="panel-head">
-            <div>
-              <span className="kicker">DIAGRAM BOARD</span>
-              <h2>{chapter.title}</h2>
-              <p>
-                এই chapter-এর বর্তমান concept data-তে
-                standard diagram-based topic পাওয়া যায়নি।
-              </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding:"28px",
-              borderRadius:"16px",
-              border:"1px solid #25303a",
-              background:"#090d12",
-              textAlign:"center"
-            }}
-          >
-            <div style={{fontSize:"34px",marginBottom:"10px"}}>—</div>
-
-            <strong style={{fontSize:"17px"}}>
-              No diagram required for these topics
-            </strong>
-
-            <p style={{opacity:.6,marginTop:"8px"}}>
-              Diagram না থাকা topic-এর জন্য এখানে
-              কোনো fake/generic diagram দেখানো হবে না।
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const model = detectDiagramModel(chapter,selected);
 
   const savedChapter = state.diagrams?.[chapter.id] || {};
   const savedByConcept = savedChapter.byConcept || {};
 
-  const model = selected.model;
-
-  const defaults =
-    typeof defaultDiagramValues === "function"
-      ? defaultDiagramValues(model)
-      : {};
-
   const savedValues = savedByConcept[selected.id];
+  const defaults = defaultDiagramValues(model);
 
   const values = {
     ...defaults,
     ...(savedValues || {})
   };
 
-  const change = (key,value)=>{
-    const next = {
+  const change = (key,value) => {
+    const nextValues = {
       ...values,
-      [key]:value
+      [key]: value
     };
 
     update({
@@ -1213,14 +546,14 @@ function DiagramBoard({chapter,state,update}) {
           ...savedChapter,
           byConcept:{
             ...savedByConcept,
-            [selected.id]:next
+            [selected.id]: nextValues
           }
         }
       }
     });
   };
 
-  const reset = ()=>{
+  const reset = () => {
     update({
       diagrams:{
         ...state.diagrams,
@@ -1228,161 +561,123 @@ function DiagramBoard({chapter,state,update}) {
           ...savedChapter,
           byConcept:{
             ...savedByConcept,
-            [selected.id]:defaults
+            [selected.id]: defaults
           }
         }
       }
     });
   };
 
-  const rules = diagramExamRules(model);
-
   const metric = (() => {
-    if(model==="measurement")
-      return `L = ${Number(values.length||0).toFixed(0)} cm`;
-
-    if(model==="motion")
-      return `v = ${Number(values.velocity||0).toFixed(1)} m/s`;
-
-    if(model==="force")
-      return `F = ${Number(values.force||0).toFixed(0)} N`;
-
-    if(model==="momentum")
-      return `p = ${(Number(values.mass||0)*Number(values.velocity||0)).toFixed(0)} kg·m/s`;
-
-    if(model==="energy")
-      return `PE = ${(Number(values.mass||0)*9.8*Number(values.height||0)).toFixed(0)} J`;
-
-    if(model==="wave" || model==="sound")
-      return `v = ${(Number(values.frequency||0)*Number(values.wavelength||0)).toFixed(0)}`;
-
-    if(model==="circuit"){
-      const I =
-        Number(values.resistance)
-          ? Number(values.voltage||0)/Number(values.resistance)
-          : 0;
-
+    if (model === "measurement") return `L = ${Number(values.length).toFixed(0)} cm`;
+    if (model === "motion") return `v = ${Number(values.velocity).toFixed(1)} m/s`;
+    if (model === "force") return `F = ${Number(values.force).toFixed(0)} N`;
+    if (model === "momentum") return `p = ${(Number(values.mass)*Number(values.velocity)).toFixed(0)} kg·m/s`;
+    if (model === "energy") return `E = ${(Number(values.mass)*9.8*Number(values.height)).toFixed(0)} J`;
+    if (model === "pressure") return `Depth = ${Number(values.depth).toFixed(0)} cm`;
+    if (model === "wave") return `λ = ${Number(values.wavelength).toFixed(0)} cm`;
+    if (model === "circuit") {
+      const I = Number(values.resistance)
+        ? Number(values.voltage)/Number(values.resistance)
+        : 0;
       return `I = ${I.toFixed(2)} A`;
     }
-
-    if(model==="transformer"){
-      const ratio =
-        Number(values.turns1)
-          ? Number(values.turns2||0)/Number(values.turns1)
-          : 0;
-
-      return `Vs ≈ ${(Number(values.voltage||0)*ratio).toFixed(1)} V`;
+    if (model === "transformer") {
+      const ratio = Number(values.turns1)
+        ? Number(values.turns2)/Number(values.turns1)
+        : 0;
+      return `Vs ≈ ${(Number(values.voltage)*ratio).toFixed(1)} V`;
     }
-
-    return `Model: ${diagramModelLabel(model)}`;
+    return `Angle = ${Number(values.angle || 0).toFixed(0)}°`;
   })();
 
-  const controls = {
-    measurement:[
-      ["length","Length (cm)",10,200,1]
+  const controlMap = {
+    measurement: [
+      ["length","Length (cm)",10,200,1],
     ],
-
-    motion:[
+    motion: [
       ["objectDistance","Position (m)",0,200,1],
       ["velocity","Velocity (m/s)",0,100,1],
-      ["acceleration","Acceleration (m/s²)",0,20,.5]
+      ["acceleration","Acceleration (m/s²)",0,20,.5],
     ],
-
-    force:[
+    force: [
       ["force","Force (N)",5,100,1],
       ["mass","Mass (kg)",1,50,1],
-      ["angle","Direction (°)",0,90,1]
+      ["angle","Direction (°)",0,90,1],
     ],
-
-    momentum:[
+    momentum: [
       ["mass","Mass (kg)",1,50,1],
-      ["velocity","Velocity (m/s)",0,100,1]
+      ["velocity","Velocity (m/s)",0,100,1],
     ],
-
-    energy:[
+    energy: [
       ["mass","Mass (kg)",1,50,1],
-      ["height","Height (m)",10,200,1]
+      ["height","Height (m)",10,200,1],
     ],
-
-    density:[
+    density: [
       ["density","Density",1,20,.5],
-      ["mass","Mass (kg)",1,50,1]
+      ["mass","Mass (kg)",1,50,1],
     ],
-
-    pressure:[
-      ["depth","Depth (cm)",10,150,1]
+    pressure: [
+      ["depth","Depth (cm)",10,150,1],
     ],
-
-    wave:[
+    wave: [
       ["amplitude","Amplitude",10,90,1],
       ["wavelength","Wavelength",40,180,1],
-      ["frequency","Frequency",1,10,1]
+      ["frequency","Frequency",1,10,1],
     ],
-
-    sound:[
+    sound: [
       ["amplitude","Amplitude",10,90,1],
-      ["frequency","Frequency",1,10,1]
+      ["frequency","Frequency",1,10,1],
     ],
-
-    reflection:[
-      ["angle","Incident angle (°)",5,75,1]
+    reflection: [
+      ["angle","Incident angle (°)",5,75,1],
     ],
-
-    refraction:[
-      ["angle","Incident angle (°)",5,75,1]
+    refraction: [
+      ["angle","Incident angle (°)",5,75,1],
     ],
-
-    lens:[
+    lens: [
       ["objectDistance","Object distance (cm)",40,180,1],
-      ["focalLength","Focal length (cm)",20,100,1]
+      ["focalLength","Focal length (cm)",20,100,1],
     ],
-
-    circuit:[
+    circuit: [
       ["voltage","Voltage (V)",1,24,1],
-      ["resistance","Resistance (Ω)",1,30,1]
+      ["resistance","Resistance (Ω)",1,30,1],
     ],
-
-    series:[
-      ["resistance","Resistance (Ω)",1,30,1]
+    series: [
+      ["resistance","Resistance (Ω)",1,30,1],
     ],
-
-    magnetic:[
-      ["force","Field strength",10,100,1]
+    magnetic: [
+      ["force","Field strength",10,100,1],
     ],
-
-    motor:[
+    motor: [
       ["force","Torque",10,100,1],
-      ["angle","Coil angle (°)",0,90,1]
+      ["angle","Coil angle (°)",0,90,1],
     ],
-
-    generator:[
-      ["velocity","Rotation speed",1,100,1]
+    generator: [
+      ["velocity","Rotation speed",1,100,1],
     ],
-
-    transformer:[
+    transformer: [
       ["turns1","Primary turns",5,100,1],
       ["turns2","Secondary turns",5,200,1],
-      ["voltage","Primary voltage",1,24,1]
+      ["voltage","Primary voltage",1,24,1],
     ],
-
-    heat:[
-      ["temperature","Temperature (°C)",0,100,1]
+    heat: [
+      ["temperature","Temperature (°C)",0,100,1],
     ],
-
-    atom:[
-      ["electrons","Electrons",1,8,1]
+    atom: [
+      ["electrons","Electrons",1,8,1],
     ],
-
-    radioactivity:[
-      ["frequency","Decay rate",1,10,1]
+    radioactivity: [
+      ["frequency","Decay rate",1,10,1],
     ],
-
-    semiconductor:[
-      ["voltage","Voltage (V)",0,12,.5]
+    semiconductor: [
+      ["voltage","Voltage (V)",0,12,.5],
     ],
-
-    machine:[
-      ["force","Applied force (N)",10,100,1]
+    machine: [
+      ["force","Applied force (N)",10,100,1],
+    ],
+    generic: [
+      ["angle","Control value",0,90,1],
     ]
   };
 
@@ -1393,28 +688,23 @@ function DiagramBoard({chapter,state,update}) {
 
         <div className="panel-head">
           <div>
-            <span className="kicker">
-              PHYSICS LAB • DIAGRAM TOPICS
-            </span>
-
+            <span className="kicker">PHYSICS LAB • LIVE DIAGRAMS</span>
             <h2>{chapter.title}</h2>
-
             <p>
-              শুধু যেসব topic-এ বাস্তব physics diagram/model দরকার,
-              সেগুলোই এখানে দেখানো হচ্ছে।
+              প্রতিটি concept-এর জন্য আলাদা interactive physics model।
+              Value পরিবর্তন করলে diagram-এর object/geometry পরিবর্তন হবে।
             </p>
           </div>
 
-          <span className="badge">
-            {diagramTopics.length} DIAGRAMS
-          </span>
+          <span className="badge">LIVE</span>
         </div>
 
         <div
           style={{
             display:"grid",
-            gridTemplateColumns:"minmax(230px,280px) 1fr",
-            gap:"18px"
+            gridTemplateColumns:"minmax(190px,260px) 1fr",
+            gap:"18px",
+            alignItems:"start"
           }}
         >
 
@@ -1423,77 +713,67 @@ function DiagramBoard({chapter,state,update}) {
               display:"flex",
               flexDirection:"column",
               gap:"8px",
-              maxHeight:"560px",
-              overflowY:"auto"
+              maxHeight:"520px",
+              overflowY:"auto",
+              paddingRight:"4px"
             }}
           >
-
             <div
               style={{
-                fontSize:"11px",
+                fontSize:"12px",
+                fontWeight:800,
                 letterSpacing:"1.5px",
-                opacity:.6,
-                fontWeight:800
+                opacity:.65,
+                marginBottom:"4px"
               }}
             >
-              DIAGRAM-AVAILABLE TOPICS
+              CONCEPTS • {concepts.length}
             </div>
 
-            {diagramTopics.map((c,index)=>{
-              const active = c.id===selected.id;
+            {concepts.map((c,index)=>{
+              const active = c.id === selected.id;
+              const m = detectDiagramModel(chapter,c);
 
               return (
                 <button
-                  key={c.id}
+                  key={c.id || index}
                   onClick={()=>setSelectedId(c.id)}
                   style={{
-                    padding:"13px",
-                    borderRadius:"12px",
-                    border:"1px solid",
-                    borderColor:
-                      active ? "#67e8f9" : "#26313b",
-                    background:
-                      active ? "#12202a" : "#090d12",
-                    color:"#f4f8fb",
+                    width:"100%",
                     textAlign:"left",
-                    cursor:"pointer"
+                    border:"1px solid",
+                    borderColor:active ? "#67e8f9" : "#27313b",
+                    background:active ? "#111d27" : "#0b0f14",
+                    color:"#eef6fb",
+                    borderRadius:"12px",
+                    padding:"12px",
+                    cursor:"pointer",
+                    boxShadow:active ? "0 0 18px rgba(103,232,249,.16)" : "none"
                   }}
                 >
-                  <div
-                    style={{
-                      display:"flex",
-                      gap:"10px",
-                      alignItems:"center"
-                    }}
-                  >
-
-                    <span
-                      style={{
-                        width:"30px",
-                        height:"30px",
-                        borderRadius:"8px",
-                        display:"grid",
-                        placeItems:"center",
-                        background:
-                          active ? "#67e8f9" : "#151c23",
-                        color:
-                          active ? "#071017" : "#91a4b4",
-                        fontWeight:900
-                      }}
-                    >
+                  <div style={{display:"flex",gap:"9px",alignItems:"center"}}>
+                    <span style={{
+                      width:"28px",
+                      height:"28px",
+                      borderRadius:"8px",
+                      display:"grid",
+                      placeItems:"center",
+                      background:active ? "#67e8f9" : "#151d26",
+                      color:active ? "#071017" : "#91a4b4",
+                      fontWeight:900,
+                      fontSize:"12px"
+                    }}>
                       {String(index+1).padStart(2,"0")}
                     </span>
 
-                    <span>
-                      <strong style={{display:"block"}}>
+                    <span style={{minWidth:0}}>
+                      <strong style={{display:"block",fontSize:"13px"}}>
                         {c.title}
                       </strong>
-
                       <small style={{opacity:.55}}>
-                        {diagramModelLabel(c.model)}
+                        {m} model
                       </small>
                     </span>
-
                   </div>
                 </button>
               );
@@ -1510,68 +790,58 @@ function DiagramBoard({chapter,state,update}) {
                 marginBottom:"12px"
               }}
             >
-
               <div
                 style={{
-                  padding:"12px 15px",
+                  padding:"12px 14px",
                   border:"1px solid #26323d",
                   borderRadius:"12px",
                   background:"#090d12"
                 }}
               >
-                <span
-                  style={{
-                    display:"block",
-                    fontSize:"10px",
-                    letterSpacing:"1.5px",
-                    opacity:.5
-                  }}
-                >
+                <span style={{
+                  display:"block",
+                  fontSize:"10px",
+                  letterSpacing:"1.5px",
+                  opacity:.5
+                }}>
                   PRIMARY METRIC
                 </span>
 
-                <strong
-                  style={{
-                    display:"block",
-                    fontSize:"19px",
-                    marginTop:"5px"
-                  }}
-                >
+                <strong style={{
+                  display:"block",
+                  marginTop:"5px",
+                  fontSize:"20px"
+                }}>
                   {metric}
                 </strong>
               </div>
 
               <div
                 style={{
-                  padding:"12px 15px",
+                  padding:"12px 14px",
                   border:"1px solid #26323d",
                   borderRadius:"12px",
                   background:"#090d12",
-                  minWidth:"105px"
+                  minWidth:"120px"
                 }}
               >
-                <span
-                  style={{
-                    display:"block",
-                    fontSize:"10px",
-                    letterSpacing:"1.5px",
-                    opacity:.5
-                  }}
-                >
+                <span style={{
+                  display:"block",
+                  fontSize:"10px",
+                  letterSpacing:"1.5px",
+                  opacity:.5
+                }}>
                   STATUS
                 </span>
 
-                <strong
-                  style={{
-                    display:"block",
-                    marginTop:"5px",
-                    color:"#6ee7b7"
-                  }}
-                >
+                <strong style={{
+                  display:"block",
+                  marginTop:"5px",
+                  color:"#6ee7b7"
+                }}>
                   LIVE
                 </strong>
               </div>
-
             </div>
 
             <div
@@ -1579,7 +849,8 @@ function DiagramBoard({chapter,state,update}) {
                 border:"1px solid #202a34",
                 borderRadius:"18px",
                 overflow:"hidden",
-                background:"#05070a"
+                background:"#05070a",
+                minHeight:"420px"
               }}
             >
               <DiagramSVG
@@ -1596,15 +867,10 @@ function DiagramBoard({chapter,state,update}) {
       <div className="panel">
 
         <div className="panel-head">
-
           <div>
-            <span className="kicker">
-              EXAM RULE
-            </span>
-
-            <h2>
-              {selected.title}
-            </h2>
+            <span className="kicker">LIVE CONTROLS</span>
+            <h2>{selected.title}</h2>
+            <p>{selected.focus || chapter.focus}</p>
           </div>
 
           <button
@@ -1613,131 +879,64 @@ function DiagramBoard({chapter,state,update}) {
           >
             Reset
           </button>
-
         </div>
 
         <div
           style={{
             display:"grid",
-            gap:"8px"
-          }}
-        >
-          {rules.map((rule,i)=>(
-            <div
-              key={i}
-              style={{
-                padding:"11px 13px",
-                borderRadius:"10px",
-                border:"1px solid #26323d",
-                background:"#0a1016"
-              }}
-            >
-              <strong>
-                {i+1}.
-              </strong>{" "}
-              {rule}
-            </div>
-          ))}
-        </div>
-
-      </div>
-
-      <div className="panel">
-
-        <div className="panel-head">
-          <div>
-            <span className="kicker">
-              LIVE CONTROLS
-            </span>
-
-            <h2>
-              {diagramModelLabel(model)}
-            </h2>
-
-            <p>
-              Slider/value পরিবর্তন করলে diagram-এর
-              object/geometry পরিবর্তন হবে।
-            </p>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display:"grid",
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(240px,1fr))",
+            gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",
             gap:"14px"
           }}
         >
-
-          {(controls[model] || []).map(
-            ([key,label,min,max,step])=>(
-              <label
-                key={key}
-                style={{
-                  display:"grid",
-                  gridTemplateColumns:"1fr 78px",
-                  gap:"10px",
-                  padding:"14px",
-                  border:"1px solid #25303a",
-                  borderRadius:"12px",
-                  background:"#090d12"
-                }}
-              >
-
-                <span>
-                  <strong>
-                    {label}
-                  </strong>
-
-                  <input
-                    type="range"
-                    min={min}
-                    max={max}
-                    step={step}
-                    value={values[key] ?? min}
-                    onChange={
-                      e=>
-                        change(
-                          key,
-                          Number(e.target.value)
-                        )
-                    }
-                    style={{
-                      width:"100%",
-                      marginTop:"10px"
-                    }}
-                  />
-                </span>
+          {(controlMap[model] || controlMap.generic).map(([key,label,min,max,step])=>(
+            <label
+              key={key}
+              style={{
+                display:"grid",
+                gridTemplateColumns:"1fr 78px",
+                gap:"10px",
+                alignItems:"center",
+                padding:"14px",
+                border:"1px solid #25303a",
+                borderRadius:"12px",
+                background:"#090d12"
+              }}
+            >
+              <span>
+                <strong style={{display:"block",fontSize:"13px"}}>
+                  {label}
+                </strong>
 
                 <input
-                  type="number"
+                  type="range"
                   min={min}
                   max={max}
                   step={step}
-                  value={values[key] ?? min}
-                  onChange={
-                    e=>
-                      change(
-                        key,
-                        Number(e.target.value)
-                      )
-                  }
-                  style={{
-                    width:"100%",
-                    boxSizing:"border-box",
-                    padding:"8px",
-                    borderRadius:"8px",
-                    border:"1px solid #33404c",
-                    background:"#0e141a",
-                    color:"#fff"
-                  }}
+                  value={values[key]}
+                  onChange={e=>change(key,Number(e.target.value))}
+                  style={{width:"100%",marginTop:"10px"}}
                 />
+              </span>
 
-              </label>
-            )
-          )}
-
+              <input
+                type="number"
+                min={min}
+                max={max}
+                step={step}
+                value={values[key]}
+                onChange={e=>change(key,Number(e.target.value))}
+                style={{
+                  width:"100%",
+                  boxSizing:"border-box",
+                  padding:"9px",
+                  borderRadius:"8px",
+                  border:"1px solid #33404c",
+                  background:"#0e141a",
+                  color:"#fff"
+                }}
+              />
+            </label>
+          ))}
         </div>
 
       </div>
@@ -3247,42 +2446,8 @@ function Learn({chapter}) {
   const [openConcept,setOpenConcept]=useState(null);
   const [completed,setCompleted]=useState({});
 
-  // Concept progress is saved separately for every chapter.
-  const conceptProgressKey = `physics-concept-progress-${chapter.id}`;
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(conceptProgressKey) || "{}"
-      );
-
-      setCompleted(
-        saved && typeof saved === "object"
-          ? saved
-          : {}
-      );
-
-      setOpenConcept(null);
-    } catch {
-      setCompleted({});
-      setOpenConcept(null);
-    }
-  }, [chapter.id]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        conceptProgressKey,
-        JSON.stringify(completed)
-      );
-    } catch {}
-  }, [completed, conceptProgressKey]);
-
   const toggleComplete=(id)=>{
-    setCompleted(prev=>({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setCompleted(prev=>({...prev,[id]:!prev[id]}));
   };
 
   const completedCount=Object.values(completed).filter(Boolean).length;
@@ -3399,8 +2564,6 @@ function Learn({chapter}) {
 
                 {isOpen && (
                   <div className="concept-content">
-
-                    <TopicMicroDemo concept={c}/>
 
                     {c.definition && (
                       <div className="learning-section">
