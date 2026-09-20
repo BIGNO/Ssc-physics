@@ -4048,3 +4048,14 @@ function ExamMode({chapters,allQuestions}){
 
 
 createRoot(document.getElementById('root')).render(<App/>);
+
+
+/* Mobile App / PWA service worker */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    const base = import.meta.env.BASE_URL || "/";
+    navigator.serviceWorker.register(`${base}sw.js`, {
+      scope: base
+    }).catch(() => {});
+  });
+}

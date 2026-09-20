@@ -7541,3 +7541,162 @@ input:focus-visible {
   line-height: 1.7 !important;
 }
 
+
+
+/* =========================================================
+   MOBILE APP MODE
+   ========================================================= */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .app,
+  .shell,
+  .layout,
+  .main-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  main {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .topbar,
+  header {
+    padding: 10px 12px !important;
+  }
+
+  .search {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .search input {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .hero,
+  .chapter-hero,
+  .hero-card {
+    margin: 10px !important;
+    padding: 16px !important;
+  }
+
+  .hero h1,
+  .chapter-hero h1,
+  .hero-card h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .stats,
+  .stat-grid,
+  .dashboard-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .qcard-enhanced {
+    margin: 10px 0 !important;
+    padding: 14px !important;
+  }
+
+  .qcard-enhanced h3 {
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .qcard-enhanced .option-row {
+    min-height: 46px !important;
+    padding: 10px 12px !important;
+    font-size: 0.95rem !important;
+  }
+
+  .tabs,
+  .nav-tabs {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar,
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs button,
+  .nav-tabs button {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+  }
+
+  .whiteboard-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  .whiteboard-canvas-wrap {
+    width: 100% !important;
+    overflow: auto !important;
+  }
+
+  .question-bank {
+    width: 100% !important;
+  }
+
+  select,
+  input,
+  button {
+    min-height: 44px;
+  }
+
+  .mobile-bottom-space {
+    height: 76px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+
+  .sidebar {
+    padding: 8px !important;
+  }
+
+  .chapter-item,
+  .chapter-btn {
+    min-height: 48px !important;
+  }
+
+  .qcard-enhanced h3 {
+    font-size: 0.95rem !important;
+  }
+
+  .qcard-enhanced .option-row {
+    font-size: 0.9rem !important;
+  }
+}
